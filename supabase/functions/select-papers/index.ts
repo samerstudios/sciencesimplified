@@ -116,7 +116,78 @@ serve(async (req) => {
     
     const articles = await searchPubMed(searchQuery, startDateStr, endDateStr);
     
-    const selectedPapers = articles.slice(0, 5).map(article => ({
+    console.log(`Found ${articles.length} papers, sending to AI for selection...`);
+    
+    // Use AI to select 1-5 most compelling papers
+    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
+    if (!lovableApiKey) {
+      throw new Error('LOVABLE_API_KEY not configured');
+    }
+
+    const aiPrompt = `You are a science editor curating papers for a general audience blog post about ${subject.name}.
+
+Review these ${articles.length} research paper abstracts and select 1-5 papers that would make the most compelling story together.
+
+Consider:
+- Complementary or contrasting findings that create narrative tension
+- Scientific significance and novelty
+- Public interest and accessibility
+- Papers that together tell a cohesive story
+
+Return ONLY a JSON array of the selected paper PMIDs (the pmid field). Example format:
+["12345678", "87654321", "11223344"]
+
+Here are the papers:
+${articles.map((a, i) => `
+Paper ${i + 1}:
+PMID: ${a.pmid}
+Title: ${a.title}
+Journal: ${a.journal}
+Authors: ${a.authors}
+Abstract: ${a.abstract}
+---`).join('\n')}`;
+
+    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${lovableApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-2.5-flash',
+        messages: [
+          { role: 'user', content: aiPrompt }
+        ],
+      }),
+    });
+
+    if (!aiResponse.ok) {
+      const errorText = await aiResponse.text();
+      console.error('AI selection error:', aiResponse.status, errorText);
+      throw new Error('AI selection failed');
+    }
+
+    const aiData = await aiResponse.json();
+    const aiContent = aiData.choices?.[0]?.message?.content || '';
+    
+    // Extract JSON array from AI response
+    const jsonMatch = aiContent.match(/\[[\s\S]*?\]/);
+    if (!jsonMatch) {
+      console.error('AI response format error:', aiContent);
+      throw new Error('AI did not return valid JSON');
+    }
+    
+    const selectedPmids = JSON.parse(jsonMatch[0]) as string[];
+    console.log(`AI selected ${selectedPmids.length} papers:`, selectedPmids);
+    
+    // Filter articles to only include AI-selected ones
+    const aiSelectedArticles = articles.filter(a => selectedPmids.includes(a.pmid));
+    
+    if (aiSelectedArticles.length === 0) {
+      throw new Error('No papers matched AI selection');
+    }
+
+    const selectedPapers = aiSelectedArticles.map(article => ({
       subject_id: subjectId,
       week_number: weekNumber,
       year,
