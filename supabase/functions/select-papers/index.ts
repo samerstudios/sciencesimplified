@@ -1,0 +1,130 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+interface PubMedArticle {
+  pmid: string;
+  title: string;
+  abstract: string;
+  authors: string;
+  journal: string;
+  pubDate: string;
+  doi: string;
+}
+
+async function searchPubMed(subject: string, startDate: string, endDate: string): Promise<PubMedArticle[]> {
+  const searchUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=${encodeURIComponent(subject)}+AND+${startDate}:${endDate}[pdat]&retmax=100&retmode=json&sort=relevance`;
+  
+  const searchResponse = await fetch(searchUrl);
+  const searchData = await searchResponse.json();
+  const pmids = searchData.esearchresult?.idlist || [];
+  
+  if (pmids.length === 0) return [];
+  
+  const fetchUrl = `https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&id=${pmids.join(',')}&retmode=xml`;
+  const fetchResponse = await fetch(fetchUrl);
+  const xmlText = await fetchResponse.text();
+  
+  return parsePubMedXML(xmlText);
+}
+
+function parsePubMedXML(xml: string): PubMedArticle[] {
+  const articles: PubMedArticle[] = [];
+  const articleMatches = xml.match(/<PubmedArticle>[\s\S]*?<\/PubmedArticle>/g) || [];
+  
+  for (const articleXml of articleMatches) {
+    const pmid = articleXml.match(/<PMID[^>]*>(\d+)<\/PMID>/)?.[1] || '';
+    const title = articleXml.match(/<ArticleTitle>([\s\S]*?)<\/ArticleTitle>/)?.[1] || '';
+    const abstractMatch = articleXml.match(/<AbstractText[^>]*>([\s\S]*?)<\/AbstractText>/);
+    const abstract = abstractMatch ? abstractMatch[1].replace(/<[^>]+>/g, '') : '';
+    
+    const authorMatches = articleXml.match(/<Author[^>]*>[\s\S]*?<\/Author>/g) || [];
+    const authors = authorMatches.map(author => {
+      const lastName = author.match(/<LastName>(.*?)<\/LastName>/)?.[1] || '';
+      const foreName = author.match(/<ForeName>(.*?)<\/ForeName>/)?.[1] || '';
+      return `${foreName} ${lastName}`.trim();
+    }).filter(Boolean).join(', ');
+    
+    const journal = articleXml.match(/<Title>(.*?)<\/Title>/)?.[1] || '';
+    const pubDate = articleXml.match(/<PubDate>[\s\S]*?<Year>(\d{4})<\/Year>/)?.[1] || '';
+    const doi = articleXml.match(/<ArticleId IdType="doi">(.*?)<\/ArticleId>/)?.[1] || '';
+    
+    if (pmid && title) {
+      articles.push({ pmid, title, abstract, authors, journal, pubDate, doi });
+    }
+  }
+  
+  return articles;
+}
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+
+    const { subjectId, weekNumber, year } = await req.json();
+    
+    const { data: subject } = await supabase
+      .from('subjects')
+      .select('name')
+      .eq('id', subjectId)
+      .single();
+    
+    if (!subject) {
+      throw new Error('Subject not found');
+    }
+
+    const startDate = new Date(year, 0, (weekNumber - 1) * 7 + 1);
+    const endDate = new Date(year, 0, weekNumber * 7);
+    const startDateStr = startDate.toISOString().split('T')[0].replace(/-/g, '/');
+    const endDateStr = endDate.toISOString().split('T')[0].replace(/-/g, '/');
+    
+    console.log(`Searching PubMed for ${subject.name} papers from ${startDateStr} to ${endDateStr}`);
+    
+    const articles = await searchPubMed(subject.name, startDateStr, endDateStr);
+    
+    const selectedPapers = articles.slice(0, 5).map(article => ({
+      subject_id: subjectId,
+      week_number: weekNumber,
+      year,
+      article_title: article.title,
+      authors: article.authors,
+      journal_name: article.journal,
+      publication_date: article.pubDate ? `${article.pubDate}-01-01` : null,
+      abstract: article.abstract,
+      doi: article.doi,
+      pubmed_id: article.pmid,
+      status: 'pending_pdf'
+    }));
+
+    const { data, error } = await supabase
+      .from('selected_papers')
+      .insert(selectedPapers)
+      .select();
+
+    if (error) throw error;
+
+    console.log(`Successfully selected ${data.length} papers for ${subject.name}`);
+
+    return new Response(
+      JSON.stringify({ success: true, papersSelected: data.length, papers: data }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  } catch (error) {
+    console.error('Error in select-papers function:', error);
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+  }
+});
