@@ -1,16 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, Upload, CheckCircle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const Admin = () => {
   const [selectedSubject, setSelectedSubject] = useState("");
   const [isSelecting, setIsSelecting] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedPapers, setSelectedPapers] = useState<string[]>([]);
+  const [pendingPapers, setPendingPapers] = useState<any[]>([]);
+  const [uploadingPapers, setUploadingPapers] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
   const subjects = [
@@ -20,6 +24,65 @@ const Admin = () => {
     { id: "genetics", name: "Genetics" },
     { id: "climate", name: "Climate Science" },
   ];
+
+  useEffect(() => {
+    fetchPendingPapers();
+  }, []);
+
+  const fetchPendingPapers = async () => {
+    const { data } = await supabase
+      .from("selected_papers")
+      .select("*")
+      .eq("status", "pending_pdf")
+      .order("selection_date", { ascending: false });
+    
+    if (data) setPendingPapers(data);
+  };
+
+  const handleFileUpload = async (paperId: string, file: File) => {
+    setUploadingPapers(prev => new Set(prev).add(paperId));
+    
+    try {
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${paperId}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("research-pdfs")
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { error: updateError } = await supabase
+        .from("selected_papers")
+        .update({
+          pdf_storage_path: filePath,
+          status: "pdf_uploaded"
+        })
+        .eq("id", paperId);
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "PDF uploaded successfully!",
+        description: "Paper is ready for processing",
+      });
+
+      fetchPendingPapers();
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast({
+        title: "Upload failed",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingPapers(prev => {
+        const next = new Set(prev);
+        next.delete(paperId);
+        return next;
+      });
+    }
+  };
 
   const handleSelectPapers = async () => {
     if (!selectedSubject) {
@@ -152,6 +215,57 @@ const Admin = () => {
             </Button>
           </CardContent>
         </Card>
+
+        {pendingPapers.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Upload PDFs</CardTitle>
+              <CardDescription>
+                {pendingPapers.length} papers waiting for PDF upload
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {pendingPapers.map((paper) => (
+                <div key={paper.id} className="p-4 border rounded-lg space-y-2">
+                  <div>
+                    <h3 className="font-semibold text-sm">{paper.article_title}</h3>
+                    <p className="text-xs text-muted-foreground">{paper.journal_name}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor={`file-${paper.id}`} className="cursor-pointer">
+                      <Input
+                        id={`file-${paper.id}`}
+                        type="file"
+                        accept=".pdf"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) handleFileUpload(paper.id, file);
+                        }}
+                        disabled={uploadingPapers.has(paper.id)}
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={uploadingPapers.has(paper.id)}
+                        asChild
+                      >
+                        <span>
+                          {uploadingPapers.has(paper.id) ? (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : (
+                            <Upload className="mr-2 h-4 w-4" />
+                          )}
+                          {uploadingPapers.has(paper.id) ? "Uploading..." : "Upload PDF"}
+                        </span>
+                      </Button>
+                    </Label>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
 
         {selectedPapers.length > 0 && (
           <Card>
