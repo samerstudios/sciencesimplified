@@ -1,8 +1,9 @@
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Clock, TrendingUp, Calendar, User } from "lucide-react";
+import { ArrowLeft, Clock, TrendingUp, Calendar, User, BookOpen, ExternalLink } from "lucide-react";
 import Header from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { articles } from "@/data/articles";
 
 const ArticlePage = () => {
@@ -106,6 +107,41 @@ const ArticlePage = () => {
                   </p>
                 ))}
               </div>
+
+              {/* Citation Section */}
+              <Card className="mt-12 p-6 bg-secondary/50 border-accent/20">
+                <div className="flex items-start gap-3 mb-4">
+                  <BookOpen className="h-5 w-5 text-accent mt-1 flex-shrink-0" />
+                  <div>
+                    <h3 className="text-lg font-serif font-bold text-foreground mb-2">Original Research Citation</h3>
+                    <p className="text-xs text-muted-foreground mb-4">
+                      This article is based on peer-reviewed research. Please cite the original source when referencing this work.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="bg-card rounded-lg p-4 border border-border">
+                  <p className="text-sm text-foreground leading-relaxed mb-3">
+                    {article.citation.authors.slice(0, 3).join(", ")}
+                    {article.citation.authors.length > 3 && ", et al."}
+                    {" "}({article.citation.year}). 
+                    {" "}<span className="font-medium">{article.citation.originalTitle}.</span>
+                    {" "}<span className="italic">{article.journal}</span>
+                    {article.citation.volume && `, ${article.citation.volume}`}
+                    {article.citation.pages && `, ${article.citation.pages}`}.
+                  </p>
+                  
+                  <a 
+                    href={`https://doi.org/${article.citation.doi}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-sm text-accent hover:text-accent/80 transition-colors font-medium"
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                    DOI: {article.citation.doi}
+                  </a>
+                </div>
+              </Card>
             </div>
 
             {/* Related Articles CTA */}
