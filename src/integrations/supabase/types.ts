@@ -14,7 +14,234 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      blog_posts: {
+        Row: {
+          author: string | null
+          content: string
+          created_at: string | null
+          excerpt: string
+          hero_image_url: string | null
+          id: string
+          paper_ids: string[]
+          publish_date: string | null
+          quality_flags: Json | null
+          read_time: number
+          status: string | null
+          subject_id: string | null
+          subtitle: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          author?: string | null
+          content: string
+          created_at?: string | null
+          excerpt: string
+          hero_image_url?: string | null
+          id?: string
+          paper_ids: string[]
+          publish_date?: string | null
+          quality_flags?: Json | null
+          read_time: number
+          status?: string | null
+          subject_id?: string | null
+          subtitle?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          author?: string | null
+          content?: string
+          created_at?: string | null
+          excerpt?: string
+          hero_image_url?: string | null
+          id?: string
+          paper_ids?: string[]
+          publish_date?: string | null
+          quality_flags?: Json | null
+          read_time?: number
+          status?: string | null
+          subject_id?: string | null
+          subtitle?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_posts_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      journals: {
+        Row: {
+          created_at: string | null
+          id: string
+          impact_factor: number | null
+          is_interdisciplinary: boolean | null
+          issn: string | null
+          last_updated: string | null
+          name: string
+          subject_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          impact_factor?: number | null
+          is_interdisciplinary?: boolean | null
+          issn?: string | null
+          last_updated?: string | null
+          name: string
+          subject_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          impact_factor?: number | null
+          is_interdisciplinary?: boolean | null
+          issn?: string | null
+          last_updated?: string | null
+          name?: string
+          subject_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journals_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      paper_citations: {
+        Row: {
+          blog_post_id: string | null
+          citation_order: number
+          created_at: string | null
+          id: string
+          selected_paper_id: string | null
+        }
+        Insert: {
+          blog_post_id?: string | null
+          citation_order: number
+          created_at?: string | null
+          id?: string
+          selected_paper_id?: string | null
+        }
+        Update: {
+          blog_post_id?: string | null
+          citation_order?: number
+          created_at?: string | null
+          id?: string
+          selected_paper_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "paper_citations_blog_post_id_fkey"
+            columns: ["blog_post_id"]
+            isOneToOne: false
+            referencedRelation: "blog_posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "paper_citations_selected_paper_id_fkey"
+            columns: ["selected_paper_id"]
+            isOneToOne: false
+            referencedRelation: "selected_papers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      selected_papers: {
+        Row: {
+          abstract: string
+          article_title: string
+          authors: string
+          created_at: string | null
+          doi: string
+          id: string
+          journal_name: string
+          pdf_storage_path: string | null
+          publication_date: string | null
+          pubmed_id: string | null
+          quality_score: number | null
+          selection_date: string | null
+          status: string | null
+          subject_id: string | null
+          week_number: number
+          year: number
+        }
+        Insert: {
+          abstract: string
+          article_title: string
+          authors: string
+          created_at?: string | null
+          doi: string
+          id?: string
+          journal_name: string
+          pdf_storage_path?: string | null
+          publication_date?: string | null
+          pubmed_id?: string | null
+          quality_score?: number | null
+          selection_date?: string | null
+          status?: string | null
+          subject_id?: string | null
+          week_number: number
+          year: number
+        }
+        Update: {
+          abstract?: string
+          article_title?: string
+          authors?: string
+          created_at?: string | null
+          doi?: string
+          id?: string
+          journal_name?: string
+          pdf_storage_path?: string | null
+          publication_date?: string | null
+          pubmed_id?: string | null
+          quality_score?: number | null
+          selection_date?: string | null
+          status?: string | null
+          subject_id?: string | null
+          week_number?: number
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "selected_papers_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subjects: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
