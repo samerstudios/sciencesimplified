@@ -84,14 +84,37 @@ serve(async (req) => {
       throw new Error('Subject not found');
     }
 
+    // Get all journals for this subject (including interdisciplinary ones)
+    const { data: journalRelations } = await supabase
+      .from('journal_subjects')
+      .select('journal_id, journals(name)')
+      .eq('subject_id', subjectId);
+    
+    // Also get interdisciplinary journals (Science, Nature, Cell)
+    const { data: interdisciplinaryJournals } = await supabase
+      .from('journals')
+      .select('name')
+      .eq('is_interdisciplinary', true);
+
+    const journalNames = [
+      ...(journalRelations?.map((rel: any) => rel.journals?.name).filter(Boolean) || []),
+      ...(interdisciplinaryJournals?.map((j: any) => j.name).filter(Boolean) || [])
+    ];
+
+    console.log(`Found ${journalNames.length} journals for ${subject.name}`);
+
     const startDate = new Date(year, 0, (weekNumber - 1) * 7 + 1);
     const endDate = new Date(year, 0, weekNumber * 7);
     const startDateStr = startDate.toISOString().split('T')[0].replace(/-/g, '/');
     const endDateStr = endDate.toISOString().split('T')[0].replace(/-/g, '/');
     
+    // Build search query with subject and journals
+    const journalQuery = journalNames.map(name => `"${name}"[Journal]`).join(' OR ');
+    const searchQuery = `${subject.name} AND (${journalQuery})`;
+    
     console.log(`Searching PubMed for ${subject.name} papers from ${startDateStr} to ${endDateStr}`);
     
-    const articles = await searchPubMed(subject.name, startDateStr, endDateStr);
+    const articles = await searchPubMed(searchQuery, startDateStr, endDateStr);
     
     const selectedPapers = articles.slice(0, 5).map(article => ({
       subject_id: subjectId,

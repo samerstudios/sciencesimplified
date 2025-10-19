@@ -76,6 +76,42 @@ export type Database = {
           },
         ]
       }
+      journal_subjects: {
+        Row: {
+          created_at: string | null
+          id: string
+          journal_id: string
+          subject_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          journal_id: string
+          subject_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          journal_id?: string
+          subject_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_subjects_journal_id_fkey"
+            columns: ["journal_id"]
+            isOneToOne: false
+            referencedRelation: "journals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "journal_subjects_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       journals: {
         Row: {
           created_at: string | null
@@ -85,7 +121,6 @@ export type Database = {
           issn: string | null
           last_updated: string | null
           name: string
-          subject_id: string | null
         }
         Insert: {
           created_at?: string | null
@@ -95,7 +130,6 @@ export type Database = {
           issn?: string | null
           last_updated?: string | null
           name: string
-          subject_id?: string | null
         }
         Update: {
           created_at?: string | null
@@ -105,17 +139,8 @@ export type Database = {
           issn?: string | null
           last_updated?: string | null
           name?: string
-          subject_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "journals_subject_id_fkey"
-            columns: ["subject_id"]
-            isOneToOne: false
-            referencedRelation: "subjects"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       paper_citations: {
         Row: {
