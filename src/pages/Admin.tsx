@@ -121,6 +121,7 @@ const Admin = () => {
         title: "Papers selected!",
         description: `Found ${data.papersSelected} papers for ${selectedSubject}`,
       });
+      await fetchPendingPapers();
     } catch (error) {
       console.error("Error selecting papers:", error);
       toast({
