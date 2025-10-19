@@ -1,18 +1,61 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import CategoryFilter from "@/components/CategoryFilter";
-import ImpactFactorFilter from "@/components/ImpactFactorFilter";
 import ArticleCard from "@/components/ArticleCard";
-import { articles, categories } from "@/data/articles";
+import { supabase } from "@/integrations/supabase/client";
+import { Loader2 } from "lucide-react";
 
 const Home = () => {
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [minImpactFactor, setMinImpactFactor] = useState(20);
+  const [articles, setArticles] = useState<any[]>([]);
+  const [categories, setCategories] = useState<string[]>(["All"]);
+  const [loading, setLoading] = useState(true);
 
-  const filteredArticles = articles
-    .filter(article => article.impactFactor >= minImpactFactor)
-    .filter(article => selectedCategory === "All" || article.category === selectedCategory);
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const { data: subjects } = await supabase.from("subjects").select("name");
+        if (subjects) {
+          setCategories(["All", ...subjects.map(s => s.name)]);
+        }
+
+        const { data: posts } = await supabase
+          .from("blog_posts")
+          .select("*")
+          .eq("status", "published")
+          .order("publish_date", { ascending: false });
+
+        if (posts) {
+          const formattedArticles = posts.map(post => ({
+            id: post.id,
+            title: post.title,
+            excerpt: post.excerpt,
+            image: post.hero_image_url || "/quantum.jpg",
+            date: new Date(post.publish_date || post.created_at).toLocaleDateString("en-US", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            }),
+            readTime: post.read_time,
+            category: post.subject_id,
+          }));
+          setArticles(formattedArticles);
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const filteredArticles = articles.filter(
+    article => selectedCategory === "All" || article.category === selectedCategory
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -21,29 +64,32 @@ const Home = () => {
       
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-6 lg:px-12">
-          <ImpactFactorFilter 
-            minImpactFactor={minImpactFactor}
-            onChangeImpactFactor={setMinImpactFactor}
-          />
-          
           <CategoryFilter 
             categories={categories}
             selectedCategory={selectedCategory}
             onSelectCategory={setSelectedCategory}
           />
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-fade-in">
-            {filteredArticles.map((article) => (
-              <ArticleCard key={article.id} article={article} />
-            ))}
-          </div>
-          
-          {filteredArticles.length === 0 && (
-            <div className="text-center py-16">
-              <p className="text-muted-foreground text-lg">
-                No articles found in this category yet. Check back soon!
-              </p>
+          {loading ? (
+            <div className="flex justify-center py-16">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-fade-in">
+                {filteredArticles.map((article) => (
+                  <ArticleCard key={article.id} article={article} />
+                ))}
+              </div>
+              
+              {filteredArticles.length === 0 && (
+                <div className="text-center py-16">
+                  <p className="text-muted-foreground text-lg">
+                    No articles found. Check back soon!
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>

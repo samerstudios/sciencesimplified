@@ -1,14 +1,62 @@
 import { useParams, Link } from "react-router-dom";
-import { ArrowLeft, Clock, TrendingUp, Calendar, User, BookOpen, ExternalLink } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowLeft, Clock, Calendar, User, BookOpen, ExternalLink, Loader2 } from "lucide-react";
 import Header from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { articles } from "@/data/articles";
+import { supabase } from "@/integrations/supabase/client";
 
 const ArticlePage = () => {
   const { id } = useParams();
-  const article = articles.find(a => a.id === id);
+  const [article, setArticle] = useState<any>(null);
+  const [papers, setPapers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchArticle = async () => {
+      setLoading(true);
+      try {
+        const { data: post } = await supabase
+          .from("blog_posts")
+          .select("*, subjects(name)")
+          .eq("id", id)
+          .eq("status", "published")
+          .single();
+
+        if (post) {
+          setArticle(post);
+
+          const { data: citations } = await supabase
+            .from("paper_citations")
+            .select("selected_papers(*)")
+            .eq("blog_post_id", id)
+            .order("citation_order");
+
+          if (citations) {
+            setPapers(citations.map(c => c.selected_papers));
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching article:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchArticle();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="flex justify-center items-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </div>
+    );
+  }
 
   if (!article) {
     return (
@@ -35,7 +83,7 @@ const ArticlePage = () => {
         {/* Hero Image */}
         <div className="relative h-[50vh] md:h-[60vh] overflow-hidden bg-muted">
           <img 
-            src={article.image} 
+            src={article.hero_image_url || "/quantum.jpg"} 
             alt={article.title}
             className="w-full h-full object-cover"
           />
@@ -57,15 +105,15 @@ const ArticlePage = () => {
               {/* Category & Meta */}
               <div className="flex flex-wrap items-center gap-4 mb-6">
                 <Badge className="bg-gradient-accent text-accent-foreground">
-                  {article.category}
+                  {article.subjects?.name || "Science"}
                 </Badge>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Clock className="h-4 w-4" />
-                  <span>{article.readTime} min read</span>
+                  <span>{article.read_time} min read</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Calendar className="h-4 w-4" />
-                  <span>{new Date(article.date).toLocaleDateString('en-US', { 
+                  <span>{new Date(article.publish_date || article.created_at).toLocaleDateString('en-US', { 
                     year: 'numeric', 
                     month: 'long', 
                     day: 'numeric' 
@@ -77,9 +125,11 @@ const ArticlePage = () => {
               <h1 className="text-4xl md:text-5xl font-serif font-bold text-primary mb-4 leading-tight">
                 {article.title}
               </h1>
-              <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-                {article.subtitle}
-              </p>
+              {article.subtitle && (
+                <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
+                  {article.subtitle}
+                </p>
+              )}
 
               {/* Article Info */}
               <div className="flex flex-wrap gap-6 py-6 mb-8 border-y border-border">
@@ -90,58 +140,62 @@ const ArticlePage = () => {
                     <div className="text-xs text-muted-foreground">Author</div>
                   </div>
                 </div>
-                <div className="flex items-start gap-2">
-                  <TrendingUp className="h-5 w-5 text-accent mt-0.5" />
-                  <div>
-                    <div className="text-sm font-medium text-foreground">{article.journal}</div>
-                    <div className="text-xs text-muted-foreground">Impact Factor: {article.impactFactor}</div>
-                  </div>
-                </div>
               </div>
 
               {/* Article Content */}
-              <div className="prose prose-lg max-w-none">
-                {article.content.map((paragraph, index) => (
-                  <p key={index} className="text-foreground leading-relaxed mb-6 text-base md:text-lg">
-                    {paragraph}
-                  </p>
-                ))}
-              </div>
+              <div 
+                className="prose prose-lg max-w-none"
+                dangerouslySetInnerHTML={{ __html: article.content }}
+              />
 
               {/* Citation Section */}
-              <Card className="mt-12 p-6 bg-secondary/50 border-accent/20">
-                <div className="flex items-start gap-3 mb-4">
-                  <BookOpen className="h-5 w-5 text-accent mt-1 flex-shrink-0" />
-                  <div>
-                    <h3 className="text-lg font-serif font-bold text-foreground mb-2">Original Research Citation</h3>
-                    <p className="text-xs text-muted-foreground mb-4">
-                      This article is based on peer-reviewed research. Please cite the original source when referencing this work.
-                    </p>
+              {papers.length > 0 && (
+                <Card className="mt-12 p-6 bg-secondary/50 border-accent/20">
+                  <div className="flex items-start gap-3 mb-4">
+                    <BookOpen className="h-5 w-5 text-accent mt-1 flex-shrink-0" />
+                    <div>
+                      <h3 className="text-lg font-serif font-bold text-foreground mb-2">Research Citations</h3>
+                      <p className="text-xs text-muted-foreground mb-4">
+                        This article is based on peer-reviewed research. Please cite the original sources when referencing this work.
+                      </p>
+                    </div>
                   </div>
-                </div>
-                
-                <div className="bg-card rounded-lg p-4 border border-border">
-                  <p className="text-sm text-foreground leading-relaxed mb-3">
-                    {article.citation.authors.slice(0, 3).join(", ")}
-                    {article.citation.authors.length > 3 && ", et al."}
-                    {" "}({article.citation.year}). 
-                    {" "}<span className="font-medium">{article.citation.originalTitle}.</span>
-                    {" "}<span className="italic">{article.journal}</span>
-                    {article.citation.volume && `, ${article.citation.volume}`}
-                    {article.citation.pages && `, ${article.citation.pages}`}.
-                  </p>
                   
-                  <a 
-                    href={`https://doi.org/${article.citation.doi}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-sm text-accent hover:text-accent/80 transition-colors font-medium"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                    DOI: {article.citation.doi}
-                  </a>
-                </div>
-              </Card>
+                  {papers.map((paper, index) => (
+                    <div key={paper.id} className="bg-card rounded-lg p-4 border border-border mb-3 last:mb-0">
+                      <p className="text-sm text-foreground leading-relaxed mb-3">
+                        {paper.authors}
+                        {" "}({new Date(paper.publication_date).getFullYear()}). 
+                        {" "}<span className="font-medium">{paper.article_title}.</span>
+                        {" "}<span className="italic">{paper.journal_name}</span>
+                      </p>
+                      
+                      {paper.doi && (
+                        <a 
+                          href={`https://doi.org/${paper.doi}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 text-sm text-accent hover:text-accent/80 transition-colors font-medium"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                          DOI: {paper.doi}
+                        </a>
+                      )}
+                      {paper.pubmed_id && (
+                        <a 
+                          href={`https://pubmed.ncbi.nlm.nih.gov/${paper.pubmed_id}/`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 text-sm text-accent hover:text-accent/80 transition-colors font-medium ml-4"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                          PubMed: {paper.pubmed_id}
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </Card>
+              )}
             </div>
 
             {/* Related Articles CTA */}
