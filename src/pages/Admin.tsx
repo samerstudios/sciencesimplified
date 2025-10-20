@@ -63,6 +63,31 @@ const Admin = () => {
     if (data) setDraftPosts(data);
   };
 
+  const handleClearAllPosts = async () => {
+    try {
+      const { error } = await supabase
+        .from("blog_posts")
+        .delete()
+        .neq("id", "00000000-0000-0000-0000-000000000000"); // Delete all rows
+
+      if (error) throw error;
+
+      toast({
+        title: "All posts deleted",
+        description: "All blog posts have been removed from the database",
+      });
+
+      await fetchDraftPosts();
+    } catch (error) {
+      console.error("Delete error:", error);
+      toast({
+        title: "Delete failed",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleFileUpload = async (paperId: string, file: File) => {
     setUploadingPapers(prev => new Set(prev).add(paperId));
     
@@ -319,10 +344,21 @@ const Admin = () => {
         {draftPosts.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Draft Posts</CardTitle>
-              <CardDescription>
-                {draftPosts.length} draft blog posts ready to publish
-              </CardDescription>
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle>Draft Posts</CardTitle>
+                  <CardDescription>
+                    {draftPosts.length} draft blog posts ready to publish
+                  </CardDescription>
+                </div>
+                <Button
+                  onClick={handleClearAllPosts}
+                  variant="destructive"
+                  size="sm"
+                >
+                  Clear All Posts
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               {draftPosts.map((post) => (
