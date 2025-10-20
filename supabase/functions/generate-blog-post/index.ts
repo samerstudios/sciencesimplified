@@ -221,8 +221,8 @@ serve(async (req) => {
         // Map subject_id to hero image
         const subjectImageMap: Record<string, string> = {
           '3a2750e5-4de3-443e-933a-4ff3858cd822': '/neuroplasticity.jpg', // Neuroscience
-          'ba7c52fb-0124-42dc-af06-335ec1239810': '/microbiome.jpg',      // Immunology
-          'b99b45c3-782e-4d1f-b072-745c5687e59e': '/genetics.jpg',        // Cancer
+          'ba7c52fb-0124-42dc-af06-335ec1239810': '/immunology.jpg',      // Immunology
+          'b99b45c3-782e-4d1f-b072-745c5687e59e': '/cancer.jpg',          // Cancer
           '596e6779-37d7-4843-b9ac-9f14877f5a11': '/genetics.jpg',        // Genetics
           'd7f66f2f-88e1-4558-879e-f141ff3b54f8': '/climate.jpg',         // Climate
           'e418764e-bc42-45d5-864a-634c71801f94': '/microbiome.jpg',      // Microbiology
