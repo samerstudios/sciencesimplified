@@ -158,13 +158,14 @@ const Admin = () => {
 
       if (error) throw error;
 
+      // Immediately update the UI by filtering out the deleted paper
+      setPendingPapers(prev => prev.filter(paper => paper.id !== paperId));
+      setSelectedPapers(prev => prev.filter(id => id !== paperId));
+
       toast({
         title: "Paper deleted",
         description: "Paper removed from pending uploads",
       });
-
-      await fetchPendingPapers();
-      setSelectedPapers(prev => prev.filter(id => id !== paperId));
     } catch (error) {
       console.error("Delete error:", error);
       toast({
@@ -184,13 +185,14 @@ const Admin = () => {
 
       if (error) throw error;
 
+      // Immediately update the UI by clearing all pending papers
+      setPendingPapers([]);
+      setSelectedPapers([]);
+
       toast({
         title: "All pending papers deleted",
-        description: `Removed ${pendingPapers.length} papers from pending uploads`,
+        description: "All papers removed from pending uploads",
       });
-
-      await fetchPendingPapers();
-      setSelectedPapers([]);
     } catch (error) {
       console.error("Delete error:", error);
       toast({
@@ -221,13 +223,18 @@ const Admin = () => {
 
       if (updateError) throw updateError;
 
+      // Immediately update the UI
+      const movedPaper = readyPapers.find(p => p.id === paperId);
+      if (movedPaper) {
+        setReadyPapers(prev => prev.filter(p => p.id !== paperId));
+        setPendingPapers(prev => [...prev, { ...movedPaper, status: "pending_pdf", pdf_storage_path: null }]);
+        setSelectedPapers(prev => [...prev, paperId]);
+      }
+
       toast({
         title: "PDF deleted successfully",
         description: "Paper moved back to pending uploads",
       });
-
-      await fetchPendingPapers();
-      setSelectedPapers(prev => [...prev, paperId]);
     } catch (error) {
       console.error("Delete error:", error);
       toast({
