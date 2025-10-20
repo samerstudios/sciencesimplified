@@ -13,38 +13,80 @@ async function generateContent(papers: any[]): Promise<any> {
     `Paper ${i + 1}: "${p.article_title}"\nAuthors: ${p.authors}\nJournal: ${p.journal_name}\nAbstract: ${p.abstract}\n`
   ).join('\n---\n');
 
-  const prompt = `You are a science communicator writing for high school students and general readers with NO science background. Based on these recent research papers, create an engaging blog post that:
+  const prompt = `You are a science communicator writing for high school students and general readers with NO science background. Create an ENGAGING STORY-DRIVEN blog post following this exact structure:
 
-CRITICAL RULES:
+CRITICAL WRITING RULES:
 - Write at a high school reading level (ages 14-18)
 - Use ZERO scientific jargon without explanation
 - Replace technical terms with everyday language and relatable analogies
-- Explain concepts like you're talking to a curious friend
-- Use short sentences and common words
-- Make it exciting and relevant to everyday life
+- Use short paragraphs (2-4 sentences each)
+- Active voice and conversational tone
+- Use first person where appropriate for relatability
 
-STRUCTURE:
-1. Catchy, non-technical title (NO jargon!)
-2. Compelling subtitle that hooks readers
-3. 2-3 sentence excerpt in plain English
-4. 1500-2000 words of clear, engaging content with:
-   - Real-world examples and analogies
-   - "Think of it like..." explanations
-   - Why this matters to regular people
-   - Cite papers naturally but simply
+EXACT STRUCTURE TO FOLLOW:
 
-AVOID: Technical terms, complex sentences, assuming scientific knowledge
-USE: Simple metaphors, everyday examples, conversational tone
+1. TITLE (Micro Hook)
+   - Clear, benefit-oriented or curiosity-driven
+   - Grab attention immediately
+   - NO jargon
+   - Signal relevance and spark curiosity
+
+2. SUBTITLE (1-2 line Relatable Hook)
+   - Quick personal/immediate touch OR surprising fact
+   - Make it feel relevant to the reader's life
+
+3. INTRODUCTION (100-150 words, 3 paragraphs)
+   Paragraph 1: Hook with a scenario, question, anecdote or surprising stat the reader can feel
+   Paragraph 2: Briefly reveal the research/insight you'll discuss
+   Paragraph 3: What the reader will get — why it's worth their time
+
+4. BODY (400-700 words) — Use clear <h2> headings for each subsection:
+   
+   A. "What's Going On / Why It Matters" (150-200 words)
+      - Set up the problem, gap, or paradox
+      - Introduce the study in everyday language
+      - Show the status quo
+      - Use examples/metaphors to make it concrete
+   
+   B. "The Discovery & Journey" (200-300 words)
+      - Make the science feel like a story using "And, But, Therefore":
+        * AND: Start with established fact/context
+        * BUT: Introduce the surprise or problem
+        * THEREFORE: Shift to the outcome/insight
+      - Show how researchers found the result
+   
+   C. "What This Means / What's Next" (150-250 words)
+      - Translate findings into implications and applications
+      - Make it relevant to the reader's world
+      - Discuss remaining questions or limitations
+      - Offer a "what you can do/think about" angle
+
+5. CONCLUSION + CALL-TO-ACTION (50-100 words)
+   - One-sentence recap of main insight
+   - Why it matters for the reader
+   - Simple invitation: comment, explore further, etc.
+
+6. CITATIONS
+   - End with proper citations of the papers referenced
+
+FORMATTING:
+- Use <h2> for main section headings
+- Use <h3> for subsection headings if needed
+- Keep paragraphs short (2-4 sentences)
+- Use <ul> or <ol> for lists when introducing multiple points
+- Bold key sentences with <strong>
+- Use <p> tags for paragraphs
+- Include <a> hyperlinks to reference papers naturally in text
 
 Papers:
 ${papersContext}
 
 Return your response as JSON with this structure:
 {
-  "title": "string",
-  "subtitle": "string", 
-  "excerpt": "string",
-  "content": "string (full HTML with proper formatting)"
+  "title": "string (micro hook title)",
+  "subtitle": "string (1-2 line relatable hook)", 
+  "excerpt": "string (the introduction section)",
+  "content": "string (full HTML starting from Body section through Citations, with proper <h2>, <h3>, <p>, <strong>, <ul>, <a> tags)"
 }`;
 
   const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
