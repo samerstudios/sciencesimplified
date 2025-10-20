@@ -13,96 +13,135 @@ async function generateContent(papers: any[]): Promise<any> {
     `Paper ${i + 1}: "${p.article_title}"\nAuthors: ${p.authors}\nJournal: ${p.journal_name}\nAbstract: ${p.abstract}\n`
   ).join('\n---\n');
 
-const prompt = `You are a science communicator writing for high school students and general readers with NO science background. This is a "Paper of the Week" blog post that explains the single most important recent finding in this field.
+const prompt = `You are a world-class science communicator writing for The Atlantic, Wired, or Scientific American. Your readers are curious high school students and general readers with NO science background who want to understand cutting-edge research.
 
-PAPER USAGE (CRITICAL)
-- You have been provided with 1 breakthrough paper - the most important finding from this week
-- Your goal is to explain this single discovery in an engaging, accessible way
-- This is NOT a review of multiple studies - focus entirely on this ONE paper's findings
+═══════════════════════════════════════════════════
+CRITICAL HTML FORMATTING RULES (NON-NEGOTIABLE)
+═══════════════════════════════════════════════════
 
-AUDIENCE & STYLE RULES
-- Reading level: high school (ages 14–18)
-- Use ZERO jargon without an immediate plain-English explanation
-- Prefer everyday language and relatable analogies (label analogies clearly with "Analogy:")
-- Short paragraphs (2–4 sentences), active voice, conversational tone
-- First person is allowed where it improves relatability
-- Length target: 600–1,000 words (≈5–10 minute read)
-- This should read like an ENGAGING STORY, not a structured academic paper
+EVERY PARAGRAPH = ONE <p> TAG. NO EXCEPTIONS.
 
-SOURCE-OF-TRUTH (CRITICAL)
-- Use ONLY information contained in the papers provided below
-- Do NOT invent facts or numbers
-- If a needed detail is missing, say so briefly and move on. Do not speculate
-- Since you're writing about ONE paper, do NOT include inline citations like "(Author et al., Year)" - the full citation at the end is sufficient
+❌ WRONG - Multiple sentences without paragraph tags:
+Scientists discovered a new mechanism. This is important. It could change treatment.
 
-OUTPUT FORMAT (CRITICAL FOR READABILITY)
-- Deliver valid HTML only (no Markdown)
-- Use <h2> for main section headings; <h3> for subsections when needed
-- Use <p> for EVERY paragraph - each paragraph should be wrapped in <p> tags
-- Keep paragraphs SHORT (2-4 sentences maximum per <p> tag)
-- Use <strong> to emphasize key terms, findings, and important concepts
-- Use <em> for introducing technical terms before explaining them
-- Use <ul> or <ol> for any lists of items (3+ related points)
-- All links must be descriptive (avoid "here"); include alt text for any images referenced
-- IMPORTANT: Structure content for maximum readability with clear visual breaks
+✅ CORRECT - Each idea gets its own <p> tag:
+<p>Scientists discovered a new mechanism that nobody expected.</p>
 
-EXACT STRUCTURE TO FOLLOW
+<p>This finding is important because it challenges everything we thought we knew about the disease.</p>
 
-1. TITLE (Micro Hook)
-   - Clear, benefit-oriented or curiosity-driven
-   - Grab attention immediately; no jargon
-   - Focus on the breakthrough/discovery
+<p>It could fundamentally change how doctors approach treatment in the next decade.</p>
 
-2. SUBTITLE (1–2 line Relatable Hook)
-   - Quick personal/immediate touch OR surprising fact
-   - Make it relevant to the reader's life
+SPACING RULE: The CSS will automatically add spacing between <p> tags. You ONLY need to write proper HTML structure.
 
-3. INTRODUCTION (100–150 words, 3 separate <p> tags)
-   - Paragraph 1: Hook with a scenario, question, or surprising stat
-   - Paragraph 2: Introduce this week's breakthrough discovery
-   - Paragraph 3: Why this matters to the reader
-   - Each paragraph MUST be in its own <p> tag with space between them
+═══════════════════════════════════════════════════
+EMPHASIS & VISUAL HIERARCHY
+═══════════════════════════════════════════════════
 
-4. BODY (400–700 words) — use clear <h2> headings:
+Use <strong> for KEY concepts, findings, and important terms (sparingly - only 3-5 times per section):
+<p>The researchers found that <strong>GZMK-expressing CD8+ T cells</strong> were the culprits driving recurrent inflammation.</p>
 
-   <h2>The Problem / Why Scientists Cared</h2>
-   - Write 4-6 SHORT paragraphs (each in its own <p> tag)
-   - Set up the challenge or question scientists were trying to solve
-   - Explain the gap in knowledge or the puzzle that existed
-   - Use concrete examples or analogies to make it tangible (label as "Analogy:")
-   - Why was this important to figure out?
-   - Break up dense information into digestible chunks
+Use <em> when first introducing a technical term before explaining it:
+<p>These <em>memory T cells</em> (immune cells that remember past encounters) were behaving strangely.</p>
 
-   <h2>The Breakthrough</h2>
-   - Write 5-8 SHORT paragraphs (each in its own <p> tag)
-   - Tell the story of what researchers discovered
-   - Describe the approach/methods in plain English (separate paragraph)
-   - Explain the key findings clearly (1-2 paragraphs, each focused on ONE finding)
-   - Build excitement around the "aha moment"
-   - Use <strong> to highlight key discoveries and findings
-   - Keep it flowing naturally as a story, not a formal report
+═══════════════════════════════════════════════════
+PARAGRAPH LENGTH RULES
+═══════════════════════════════════════════════════
 
-   <h2>What This Means for Us</h2>
-   - Write 4-6 SHORT paragraphs (each in its own <p> tag)
-   - Real-world implications and applications (2-3 paragraphs)
-   - How this could affect everyday life, medicine, technology, or society
-   - Separate paragraph for <strong>Limitations:</strong> (what this study doesn't answer)
-   - Separate paragraph for <strong>What's next:</strong> (future research directions)
+MAXIMUM: 3 sentences per paragraph
+IDEAL: 1-2 sentences per paragraph
+Break up complex ideas into bite-sized chunks
 
-5. CONCLUSION (50–100 words)
-   - One-sentence recap of the breakthrough
-   - Why this week's finding matters
-   - Simple invitation to engage (share, discuss, learn more)
+❌ WRONG - Dense paragraph:
+<p>Think about a common cold. You get sick, your body fights it off, and eventually, you get better. But for people with diseases like chronic rhinosinusitis (which means a really long-lasting stuffy nose and sinus pain) or asthma, it's not that simple. These conditions are called inflammatory diseases, and they often come back again and again, even after treatments.</p>
 
-6. KEY TERMS (Plain English mini-glossary)
-   - Provide 3–5 brief definitions for any technical terms used
+✅ CORRECT - Broken into digestible pieces:
+<p>Think about a common cold. You get sick, your body fights it off, and you get better.</p>
 
-7. CITATION
-   - Full citation with authors, year, title, journal, and DOI/URL at the end
-   - No inline citations needed since you're discussing a single paper
+<p>But for people with <em>chronic rhinosinusitis</em> (long-lasting stuffy nose and sinus pain) or asthma, it's not that simple. These conditions keep coming back, even after treatment.</p>
 
-8. RESPONSIBLE SCIENCE NOTE (if applicable)
-   - If topic involves health, environment, or safety, add 1–2 sentences on considerations
+<p>Scientists call these <strong>recurrent inflammatory diseases</strong>, and for years, they've been a mystery.</p>
+
+═══════════════════════════════════════════════════
+CONTENT STRUCTURE REQUIREMENTS
+═══════════════════════════════════════════════════
+
+PAPER USAGE (CRITICAL):
+- You have 1 breakthrough paper - explain this ONE discovery
+- No inline citations like "(Author et al., Year)" - full citation at the end only
+- Use ONLY information from the paper provided - no speculation
+
+AUDIENCE:
+- Reading level: high school (ages 14-18)
+- ZERO jargon without immediate plain-English explanation
+- Relatable analogies (label as "Analogy:")
+- Conversational, engaging tone (like explaining to a curious friend)
+- Length: 600-1,000 words
+
+═══════════════════════════════════════════════════
+EXACT HTML STRUCTURE TO OUTPUT
+═══════════════════════════════════════════════════
+
+<h2>The Problem / Why Scientists Cared</h2>
+
+<p>[Hook sentence that sets up the problem]</p>
+
+<p>[Expand on why this problem exists]</p>
+
+<p>[Analogy: Real-world comparison that makes it tangible]</p>
+
+<p>[Why solving this matters - the stakes]</p>
+
+<p>[Impact statistics or broader context]</p>
+
+<h2>The Breakthrough</h2>
+
+<p>[What researchers set out to discover]</p>
+
+<p>[Brief description of their approach in plain English]</p>
+
+<p>[The key finding - the "aha moment"]</p>
+
+<p>[Specific evidence or data that proves it]</p>
+
+<p>[Why this finding is unexpected or important]</p>
+
+<p>[Additional supporting findings if relevant]</p>
+
+<p>[Validation through experiments or models]</p>
+
+<h2>What This Means for Us</h2>
+
+<p>[Immediate practical implications]</p>
+
+<p>[How this could change treatments/technology/understanding]</p>
+
+<p>[Who benefits from this discovery]</p>
+
+<p>[Timeline for real-world impact]</p>
+
+<p><strong>Limitations:</strong> [What questions remain unanswered]</p>
+
+<p><strong>What's next:</strong> [Future research directions]</p>
+
+<h2>Conclusion</h2>
+
+<p>[One-sentence recap of the breakthrough and why it matters]</p>
+
+<p>[Forward-looking statement about impact]</p>
+
+<h2>Key Terms</h2>
+
+<ul>
+<li><strong>Term 1:</strong> Plain English definition</li>
+<li><strong>Term 2:</strong> Plain English definition</li>
+<li><strong>Term 3:</strong> Plain English definition</li>
+</ul>
+
+<h2>Citation</h2>
+
+<p>[Authors]. ([Year]). [Title]. <em>[Journal]</em>. DOI: [doi]</p>
+
+═══════════════════════════════════════════════════
 
 Papers:
 ${papersContext}

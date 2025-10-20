@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Upload, CheckCircle, Eye } from "lucide-react";
+import { Loader2, Upload, CheckCircle, Eye, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -386,6 +386,37 @@ const Admin = () => {
                     >
                       <Eye className="mr-2 h-4 w-4" />
                       Preview
+                    </Button>
+                    <Button
+                      onClick={async () => {
+                        try {
+                          const { error } = await supabase
+                            .from("blog_posts")
+                            .delete()
+                            .eq("id", post.id);
+
+                          if (error) throw error;
+
+                          toast({
+                            title: "Post deleted",
+                            description: "The blog post has been removed",
+                          });
+
+                          await fetchDraftPosts();
+                        } catch (error) {
+                          console.error("Delete error:", error);
+                          toast({
+                            title: "Delete failed",
+                            description: error instanceof Error ? error.message : "Unknown error",
+                            variant: "destructive",
+                          });
+                        }
+                      }}
+                      variant="destructive"
+                      size="sm"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete
                     </Button>
                     <Button
                       onClick={async () => {
