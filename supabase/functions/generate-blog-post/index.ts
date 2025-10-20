@@ -38,7 +38,8 @@ OUTPUT FORMAT
 
 ADDITIONAL FORMATTING & READER EXPERIENCE GUIDELINES - WHITE SPACE IS CRITICAL
 - Add <br><br> after EVERY 2-3 paragraphs to create generous breathing room between text blocks
-- Add <br><br> before and after every <h2>, <h3>, <figure>, <blockquote>, <hr>, <ul>, and <ol> element
+- Add <br><br> before and after every <h2>, <figure>, <blockquote>, <hr>, <ul>, and <ol> element
+- EXCEPTION: After <h3> headers (like "Key Terms" and "References"), use only ONE <br> (not <br><br>)
 - Keep paragraphs short (2-4 sentences) and focused on a single idea
 - Use <strong> sparingly for emphasis (no more than 3-4 total per article)
 - BLOCKQUOTE RULES (CRITICAL):
@@ -104,10 +105,12 @@ EXACT STRUCTURE TO FOLLOW (INTERNAL GUIDANCE - DO NOT OUTPUT THESE SECTION LABEL
 6. KEY TERMS (Plain English mini-glossary)
    - Provide 3-6 brief definitions for any unavoidable technical terms
    - Format as a simple list with <h3>Key Terms</h3>
+   - Use only ONE <br> after the <h3> header (not <br><br>)
 
 7. CITATIONS
    - List all referenced papers at the end with author(s), year, title, journal (if given), and DOI/URL
    - Format with <h3>References</h3>
+   - Use only ONE <br> after the <h3> header (not <br><br>)
    - NO inline citations in the body text
 
 Papers:
