@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 const Admin = () => {
-  const [selectedSubject, setSelectedSubject] = useState("");
+  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [isSelecting, setIsSelecting] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedPapers, setSelectedPapers] = useState<string[]>([]);
@@ -150,42 +150,70 @@ const Admin = () => {
   };
 
   const handleSelectPapers = async () => {
-    if (!selectedSubject) {
-      toast({ title: "Please select a subject", variant: "destructive" });
+    if (selectedSubjects.length === 0) {
+      toast({ title: "Please select at least one subject", variant: "destructive" });
       return;
     }
 
     setIsSelecting(true);
+    let totalPapersSelected = 0;
+    const allErrors: string[] = [];
+    
     try {
-      const { data: subjectData } = await supabase
-        .from("subjects")
-        .select("id")
-        .eq("name", selectedSubject)
-        .single();
-
-      if (!subjectData) {
-        throw new Error("Subject not found");
-      }
-
       const now = new Date();
       const weekNumber = Math.ceil(now.getDate() / 7);
       const year = now.getFullYear();
 
-      const { data, error } = await supabase.functions.invoke("select-papers", {
-        body: {
-          subjectId: subjectData.id,
-          weekNumber,
-          year,
-        },
-      });
+      // Process each subject sequentially
+      for (const subjectName of selectedSubjects) {
+        try {
+          const { data: subjectData } = await supabase
+            .from("subjects")
+            .select("id")
+            .eq("name", subjectName)
+            .single();
 
-      if (error) throw error;
+          if (!subjectData) {
+            allErrors.push(`${subjectName}: Subject not found`);
+            continue;
+          }
 
-      setSelectedPapers(data.papers.map((p: any) => p.id));
-      toast({
-        title: "Papers selected!",
-        description: `Found ${data.papersSelected} papers for ${selectedSubject}`,
-      });
+          const { data, error } = await supabase.functions.invoke("select-papers", {
+            body: {
+              subjectId: subjectData.id,
+              weekNumber,
+              year,
+            },
+          });
+
+          if (error) {
+            allErrors.push(`${subjectName}: ${error.message}`);
+            continue;
+          }
+
+          totalPapersSelected += data.papersSelected || 0;
+          setSelectedPapers(prev => [...prev, ...data.papers.map((p: any) => p.id)]);
+        } catch (error) {
+          allErrors.push(`${subjectName}: ${error instanceof Error ? error.message : "Unknown error"}`);
+        }
+      }
+
+      // Show results
+      if (totalPapersSelected > 0) {
+        toast({
+          title: "Papers selected!",
+          description: `Found ${totalPapersSelected} papers across ${selectedSubjects.length} subjects`,
+        });
+      }
+
+      if (allErrors.length > 0) {
+        toast({
+          title: "Some subjects had errors",
+          description: allErrors.join(", "),
+          variant: "destructive",
+        });
+      }
+
       await fetchPendingPapers();
     } catch (error) {
       console.error("Error selecting papers:", error);
@@ -256,30 +284,60 @@ const Admin = () => {
           <CardHeader>
             <CardTitle>Select Papers</CardTitle>
             <CardDescription>
-              Choose a subject to fetch the latest research papers
+              Choose one or more subjects to fetch the latest research papers
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+            <div className="space-y-2">
+              <Label>Selected Subjects ({selectedSubjects.length})</Label>
+              <div className="flex flex-wrap gap-2 min-h-[40px] p-2 border rounded-md">
+                {selectedSubjects.length === 0 ? (
+                  <span className="text-sm text-muted-foreground">No subjects selected</span>
+                ) : (
+                  selectedSubjects.map((subject) => (
+                    <div key={subject} className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-sm flex items-center gap-2">
+                      {subject}
+                      <button
+                        onClick={() => setSelectedSubjects(prev => prev.filter(s => s !== subject))}
+                        className="hover:bg-primary/80 rounded-full"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <Select 
+              value="" 
+              onValueChange={(value) => {
+                if (value && !selectedSubjects.includes(value)) {
+                  setSelectedSubjects(prev => [...prev, value]);
+                }
+              }}
+            >
               <SelectTrigger>
-                <SelectValue placeholder="Select a subject" />
+                <SelectValue placeholder="Add a subject" />
               </SelectTrigger>
-              <SelectContent className="bg-background">
-                {subjects.map((subject) => (
-                  <SelectItem key={subject.id} value={subject.name}>
-                    {subject.name}
-                  </SelectItem>
-                ))}
+              <SelectContent className="bg-background z-50">
+                {subjects
+                  .filter(subject => !selectedSubjects.includes(subject.name))
+                  .map((subject) => (
+                    <SelectItem key={subject.id} value={subject.name}>
+                      {subject.name}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
 
             <Button
               onClick={handleSelectPapers}
-              disabled={isSelecting || !selectedSubject}
+              disabled={isSelecting || selectedSubjects.length === 0}
               className="w-full"
             >
               {isSelecting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isSelecting ? "Selecting Papers..." : "Select Papers from PubMed"}
+              {isSelecting ? "Selecting Papers..." : `Select Papers from PubMed (${selectedSubjects.length} ${selectedSubjects.length === 1 ? 'subject' : 'subjects'})`}
             </Button>
           </CardContent>
         </Card>
