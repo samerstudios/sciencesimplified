@@ -149,6 +149,31 @@ const Admin = () => {
     }
   };
 
+  const handleDeletePendingPaper = async (paperId: string) => {
+    try {
+      const { error } = await supabase
+        .from("selected_papers")
+        .delete()
+        .eq("id", paperId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Paper deleted",
+        description: "Paper removed from pending uploads",
+      });
+
+      fetchPendingPapers();
+    } catch (error) {
+      console.error("Delete error:", error);
+      toast({
+        title: "Delete failed",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleDeletePdf = async (paperId: string, pdfPath: string) => {
     try {
       // Delete the file from storage
@@ -420,6 +445,13 @@ const Admin = () => {
                         </span>
                       </Button>
                     </Label>
+                    <Button
+                      onClick={() => handleDeletePendingPaper(paper.id)}
+                      variant="destructive"
+                      size="sm"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               ))}
