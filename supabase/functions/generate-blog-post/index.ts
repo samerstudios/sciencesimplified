@@ -218,16 +218,31 @@ serve(async (req) => {
         
         const readTime = generatedContent.reading_time_minutes || Math.ceil(generatedContent.content.split(' ').length / 200);
 
+        // Map subject_id to hero image
+        const subjectImageMap: Record<string, string> = {
+          '3a2750e5-4de3-443e-933a-4ff3858cd822': '/neuroplasticity.jpg', // Neuroscience
+          'ba7c52fb-0124-42dc-af06-335ec1239810': '/microbiome.jpg',      // Immunology
+          'b99b45c3-782e-4d1f-b072-745c5687e59e': '/genetics.jpg',        // Cancer
+          '596e6779-37d7-4843-b9ac-9f14877f5a11': '/genetics.jpg',        // Genetics
+          'd7f66f2f-88e1-4558-879e-f141ff3b54f8': '/climate.jpg',         // Climate
+          'e418764e-bc42-45d5-864a-634c71801f94': '/microbiome.jpg',      // Microbiology
+          'a2588b0c-a80e-42aa-9ffe-f06c508f3adf': '/quantum.jpg',         // Physics
+          '33f41edc-13c4-4346-a10f-2aa7d541ba3a': '/fusion.jpg'           // Energy
+        };
+
+        const heroImage = subjectImageMap[paper.subject_id] || '/quantum.jpg';
+
         const { data: blogPost, error: blogError } = await supabase
           .from('blog_posts')
           .insert({
-            subject_id: subjectId || paper.subject_id,
+            subject_id: paper.subject_id,
             title: generatedContent.title,
             subtitle: generatedContent.subtitle,
             excerpt: generatedContent.excerpt,
             content: generatedContent.content,
             read_time: readTime,
             paper_ids: [paper.id],
+            hero_image_url: heroImage,
             status: 'draft'
           })
           .select()

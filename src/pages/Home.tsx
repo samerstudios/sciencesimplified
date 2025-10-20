@@ -16,14 +16,19 @@ const Home = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const { data: subjects } = await supabase.from("subjects").select("name");
+        const { data: subjects } = await supabase.from("subjects").select("id, name");
         if (subjects) {
           setCategories(["All", ...subjects.map(s => s.name)]);
         }
 
         const { data: posts } = await supabase
           .from("blog_posts")
-          .select("*")
+          .select(`
+            *,
+            subjects:subject_id (
+              name
+            )
+          `)
           .eq("status", "published")
           .order("publish_date", { ascending: false });
 
@@ -39,7 +44,7 @@ const Home = () => {
               day: "numeric",
             }),
             readTime: post.read_time,
-            category: post.subject_id,
+            category: (post.subjects as any)?.name || "Physics",
           }));
           setArticles(formattedArticles);
         }
