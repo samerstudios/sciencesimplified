@@ -371,6 +371,40 @@ const Admin = () => {
     }
   };
 
+  const handlePublishAll = async () => {
+    if (draftPosts.length === 0) return;
+
+    const publishDate = new Date().toISOString();
+    const postIds = draftPosts.map(p => p.id);
+
+    try {
+      const { error } = await supabase
+        .from("blog_posts")
+        .update({ 
+          status: "published",
+          publish_date: publishDate
+        })
+        .in("id", postIds);
+
+      if (error) throw error;
+
+      toast({
+        title: "All posts published!",
+        description: `${draftPosts.length} blog posts are now live`,
+      });
+
+      await fetchDraftPosts();
+      await fetchPublishedPosts();
+    } catch (error) {
+      console.error("Publish all error:", error);
+      toast({
+        title: "Publish failed",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background p-8">
       <div className="max-w-4xl mx-auto space-y-8">
@@ -597,13 +631,23 @@ const Admin = () => {
                     {draftPosts.length} draft blog posts ready to publish
                   </CardDescription>
                 </div>
-                <Button
-                  onClick={handleClearAllPosts}
-                  variant="destructive"
-                  size="sm"
-                >
-                  Clear All Posts
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handlePublishAll}
+                    variant="default"
+                    size="sm"
+                  >
+                    <CheckCircle className="mr-2 h-4 w-4" />
+                    Publish All
+                  </Button>
+                  <Button
+                    onClick={handleClearAllPosts}
+                    variant="destructive"
+                    size="sm"
+                  >
+                    Clear All Posts
+                  </Button>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
