@@ -27,7 +27,7 @@ SOURCE-OF-TRUTH
 - Use ONLY information contained in the papers below
 - Do NOT invent facts or numbers
 - If a needed detail is missing, say so briefly and move on
-- Attribute specific claims to the relevant paper(s) with inline hyperlinks
+- DO NOT include inline citations (like "Lan et al., 2024") in the text—all citations go at the end
 
 OUTPUT FORMAT
 - Deliver valid HTML only (no Markdown)
@@ -85,9 +85,9 @@ EXACT STRUCTURE TO FOLLOW (INTERNAL GUIDANCE - DO NOT OUTPUT THESE SECTION LABEL
    - Format as a simple list with <h3>Key Terms</h3>
 
 7. CITATIONS
-   - Inline: hyperlink author/year or paper title at the specific claims
-   - End section: list all referenced papers with author(s), year, title, journal (if given), and DOI/URL
+   - List all referenced papers at the end with author(s), year, title, journal (if given), and DOI/URL
    - Format with <h3>References</h3>
+   - NO inline citations in the body text
 
 Papers:
 ${papersContext}
