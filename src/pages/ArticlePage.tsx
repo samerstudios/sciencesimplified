@@ -146,20 +146,20 @@ const ArticlePage = () => {
               <div 
                 className="prose max-w-none
                   [&_h1]:font-serif [&_h1]:font-bold [&_h1]:text-primary
-                  [&_h2]:font-serif [&_h2]:font-bold [&_h2]:text-primary [&_h2]:text-2xl md:[&_h2]:text-3xl [&_h2]:mt-12 md:[&_h2]:mt-16 [&_h2]:mb-3 [&_h2]:leading-snug
-                  [&_h3]:font-serif [&_h3]:font-bold [&_h3]:text-primary [&_h3]:text-xl md:[&_h3]:text-2xl [&_h3]:mt-8 md:[&_h3]:mt-10 [&_h3]:mb-1.5
-                  [&_p]:text-base md:[&_p]:text-lg [&_p]:text-foreground/90 [&_p]:leading-relaxed md:[&_p]:leading-loose [&_p]:mb-4
+                  [&_h2]:font-serif [&_h2]:font-bold [&_h2]:text-primary [&_h2]:text-2xl md:[&_h2]:text-3xl [&_h2]:mt-8 md:[&_h2]:mt-10 [&_h2]:mb-3 [&_h2]:leading-snug
+                  [&_h3]:font-serif [&_h3]:font-bold [&_h3]:text-primary [&_h3]:text-xl md:[&_h3]:text-2xl [&_h3]:mt-5 md:[&_h3]:mt-6 [&_h3]:mb-1.5
+                  [&_p]:text-base md:[&_p]:text-lg [&_p]:text-foreground/90 [&_p]:leading-relaxed md:[&_p]:leading-loose [&_p]:mb-3
                   [&_strong]:text-foreground [&_strong]:font-semibold
                   [&_em]:text-foreground/80
                   [&_blockquote]:border-l-4 [&_blockquote]:border-accent [&_blockquote]:pl-4 md:[&_blockquote]:pl-6 
-                  [&_blockquote]:py-3 md:[&_blockquote]:py-4 [&_blockquote]:my-5 md:[&_blockquote]:my-6 [&_blockquote]:italic 
+                  [&_blockquote]:py-3 md:[&_blockquote]:py-4 [&_blockquote]:my-4 md:[&_blockquote]:my-5 [&_blockquote]:italic 
                   [&_blockquote]:text-lg md:[&_blockquote]:text-xl [&_blockquote]:text-foreground/80 [&_blockquote]:leading-relaxed
-                  [&_ul]:my-5 md:[&_ul]:my-6 [&_ul]:space-y-2 [&_ul]:text-base md:[&_ul]:text-lg [&_ul]:pl-5
-                  [&_ol]:my-5 md:[&_ol]:my-6 [&_ol]:space-y-2 [&_ol]:text-base md:[&_ol]:text-lg [&_ol]:pl-5
+                  [&_ul]:my-4 md:[&_ul]:my-5 [&_ul]:space-y-2 [&_ul]:text-base md:[&_ul]:text-lg [&_ul]:pl-5
+                  [&_ol]:my-4 md:[&_ol]:my-5 [&_ol]:space-y-2 [&_ol]:text-base md:[&_ol]:text-lg [&_ol]:pl-5
                   [&_li]:text-foreground/90 [&_li]:leading-relaxed
-                  [&_hr]:my-8 md:[&_hr]:my-10 [&_hr]:border-border
+                  [&_hr]:my-6 md:[&_hr]:my-8 [&_hr]:border-border
                   [&_a]:text-accent [&_a]:no-underline [&_a]:underline-offset-2 hover:[&_a]:underline
-                  [&_br]:block [&_br]:my-2.5"
+                  [&_br]:block [&_br]:my-2"
                 dangerouslySetInnerHTML={{ __html: article.content }}
               />
 
