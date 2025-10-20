@@ -13,13 +13,12 @@ async function generateContent(papers: any[]): Promise<any> {
     `Paper ${i + 1}: "${p.article_title}"\nAuthors: ${p.authors}\nJournal: ${p.journal_name}\nAbstract: ${p.abstract}\n`
   ).join('\n---\n');
 
-const prompt = `You are a science communicator writing for high school students and general readers with NO science background. Produce an ENGAGING, STORY-DRIVEN science blog post strictly based on the provided Papers.
+const prompt = `You are a science communicator writing for high school students and general readers with NO science background. This is a "Paper of the Week" blog post that explains the single most important recent finding in this field.
 
 PAPER USAGE (CRITICAL)
-- You have been provided with ${papers.length} carefully selected papers that share a similar subject/theme
-- You MUST incorporate insights from ALL ${papers.length} papers in your narrative
-- These papers have been pre-selected to work together cohesively
-- Weave all papers together naturally into one compelling story
+- You have been provided with 1 breakthrough paper - the most important finding from this week
+- Your goal is to explain this single discovery in an engaging, accessible way
+- This is NOT a review of multiple studies - focus entirely on this ONE paper's findings
 
 AUDIENCE & STYLE RULES
 - Reading level: high school (ages 14–18)
@@ -47,52 +46,52 @@ EXACT STRUCTURE TO FOLLOW
 1. TITLE (Micro Hook)
    - Clear, benefit-oriented or curiosity-driven
    - Grab attention immediately; no jargon
+   - Focus on the breakthrough/discovery
 
 2. SUBTITLE (1–2 line Relatable Hook)
    - Quick personal/immediate touch OR surprising fact
    - Make it relevant to the reader's life
 
 3. INTRODUCTION (100–150 words, 3 paragraphs)
-   - Paragraph 1: Scenario, question, anecdote, or surprising stat the reader can feel
-   - Paragraph 2: Briefly reveal the research/insight you'll discuss
-   - Paragraph 3: What the reader will get—why it's worth their time
+   - Paragraph 1: Hook with a scenario, question, or surprising stat
+   - Paragraph 2: Introduce this week's breakthrough discovery
+   - Paragraph 3: Why this matters to the reader
 
 4. BODY (400–700 words) — use clear <h2> headings:
 
-   <h2>What's Going On / Why It Matters</h2> (150–200 words)
-   - Set up the problem, gap, or paradox
-   - Introduce the study in everyday language
-   - Show the status quo
-   - Use one concrete example or metaphor to make it tangible (label as "Analogy:")
+   <h2>The Problem / Why Scientists Cared</h2> (150–200 words)
+   - Set up the challenge or question scientists were trying to solve
+   - Explain the gap in knowledge or the puzzle that existed
+   - Use concrete examples or analogies to make it tangible (label as "Analogy:")
+   - Why was this important to figure out?
 
-   <h2>The Discovery & Journey</h2> (200–300 words)
-   - Tell the story as a natural narrative arc with tension and resolution
-   - Start with what scientists knew or believed (context)
-   - Build tension by introducing the surprise, problem, or unexpected finding
-   - Resolve with the discovery and its implications
-   - Briefly describe how researchers found the result (methods in plain English)
-   - Keep it flowing naturally - avoid formulaic structures or explicit labels
+   <h2>The Breakthrough</h2> (200–300 words)
+   - Tell the story of what researchers discovered
+   - Describe the approach/methods in plain English
+   - Explain the key findings clearly
+   - Build excitement around the "aha moment"
+   - Keep it flowing naturally as a story, not a formal report
 
-   <h2>What This Means / What's Next</h2> (150–250 words)
-   - Translate findings into implications/applications for everyday life or society
-   - Include "Limits of this study" (1–3 sentences)
-   - Include "What we still don't know" (1–3 sentences)
-   - Offer a small "Try this / Think about this" takeaway for the reader
+   <h2>What This Means for Us</h2> (150–250 words)
+   - Real-world implications and applications
+   - How this could affect everyday life, medicine, technology, or society
+   - Include "Limitations" (1–2 sentences on what this study doesn't answer)
+   - Include "What's next" (1–2 sentences on future research directions)
 
-5. CONCLUSION + CALL-TO-ACTION (50–100 words)
-   - One-sentence recap of the main insight
-   - Why it matters for the reader
-   - Simple invitation: comment, share, read the paper, or explore further
+5. CONCLUSION (50–100 words)
+   - One-sentence recap of the breakthrough
+   - Why this week's finding matters
+   - Simple invitation to engage (share, discuss, learn more)
 
 6. KEY TERMS (Plain English mini-glossary)
-   - Provide 3–6 brief definitions for any unavoidable technical terms
+   - Provide 3–5 brief definitions for any technical terms used
 
-7. CITATIONS
-   - Inline: hyperlink author/year or paper title at the specific claims
-   - End section: list all referenced papers with author(s), year, title, journal (if given), and DOI/URL
+7. CITATION
+   - Inline: hyperlink author/year or paper title when referencing specific claims
+   - End section: Full citation with authors, year, title, journal, and DOI/URL
 
 8. RESPONSIBLE SCIENCE NOTE (if applicable)
-   - If the topic touches health, environment, or AI safety, add 1–2 sentences on ethical/safety considerations
+   - If topic involves health, environment, or safety, add 1–2 sentences on considerations
 
 Papers:
 ${papersContext}
@@ -105,10 +104,8 @@ Return your response as JSON with this structure:
   "content": "string (full HTML starting from Body section through Citations, with proper <h2>, <h3>, <p>, <strong>, <ul>, <a> tags)",
   "reading_time_minutes": integer,
   "word_count": integer,
-  "reading_time_minutes": integer,
-  "word_count": integer,
   "tags": ["science", "<domain>", "explain-like-I'm-15"],
-  "sources_used": ["<first author year>", "..."]
+  "sources_used": ["<first author year>"]
 }`;
 
   const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {

@@ -142,22 +142,22 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
-    const aiPrompt = `You are a science editor curating papers for a general audience blog post about ${subject.name}.
+    const aiPrompt = `You are a science editor selecting the "Paper of the Week" for ${subject.name} to communicate recent scientific findings to a non-science audience.
 
-Review these ${sortedArticles.length} research paper abstracts (already sorted by journal impact factor, highest first) and select exactly 5 papers that share a SIMILAR SUBJECT or theme.
+Review these ${sortedArticles.length} research paper abstracts (already sorted by journal impact factor, highest first) and select THE SINGLE MOST IMPORTANT paper from this week.
 
 CRITICAL SELECTION CRITERIA (in order of priority):
-1. THEMATIC SIMILARITY: Papers must be along the same subject/theme - they should naturally complement each other
-2. FAVOR HIGH-IMPACT JOURNALS: Papers earlier in the list are from higher-impact journals - prefer these when possible
-3. SCIENTIFIC SIGNIFICANCE: Novel, impactful findings
-4. PUBLIC INTEREST: Topics accessible and interesting to a general audience
+1. HIGHEST IMPACT: From the top-tier journal (papers are sorted by impact factor)
+2. SCIENTIFIC SIGNIFICANCE: Novel, breakthrough findings that advance the field
+3. PUBLIC INTEREST: Most accessible and compelling for a general audience
+4. NEWSWORTHY: Recent development that matters to people
 
-Your goal is to select papers that naturally work together because they explore the same or closely related topics, NOT papers that contrast or create tension.
+Your goal is to find the ONE paper that best represents "what happened this week in ${subject.name}."
 
-Return ONLY a JSON array of exactly 5 selected paper PMIDs (the pmid field). Example format:
-["12345678", "87654321", "11223344", "99887766", "55443322"]
+Return ONLY a JSON array with exactly 1 paper PMID (the pmid field). Example format:
+["12345678"]
 
-Here are the papers (sorted by impact factor):
+Here are the papers (sorted by impact factor, highest first):
 ${sortedArticles.map((a, i) => `
 Paper ${i + 1}:
 PMID: ${a.pmid}
@@ -198,7 +198,7 @@ Abstract: ${a.abstract}
     }
     
     const selectedPmids = JSON.parse(jsonMatch[0]) as string[];
-    console.log(`AI selected ${selectedPmids.length} papers:`, selectedPmids);
+    console.log(`AI selected Paper of the Week:`, selectedPmids[0]);
     
     // Filter articles to only include AI-selected ones
     const aiSelectedArticles = sortedArticles.filter(a => selectedPmids.includes(a.pmid));
