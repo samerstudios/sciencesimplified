@@ -14,6 +14,7 @@ const Admin = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [selectedPapers, setSelectedPapers] = useState<string[]>([]);
   const [pendingPapers, setPendingPapers] = useState<any[]>([]);
+  const [readyPapers, setReadyPapers] = useState<any[]>([]);
   const [uploadingPapers, setUploadingPapers] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
@@ -30,13 +31,20 @@ const Admin = () => {
   }, []);
 
   const fetchPendingPapers = async () => {
-    const { data } = await supabase
+    const { data: pending } = await supabase
       .from("selected_papers")
       .select("*")
       .eq("status", "pending_pdf")
       .order("selection_date", { ascending: false });
     
-    if (data) setPendingPapers(data);
+    const { data: ready } = await supabase
+      .from("selected_papers")
+      .select("*")
+      .eq("status", "pdf_uploaded")
+      .order("selection_date", { ascending: false });
+    
+    if (pending) setPendingPapers(pending);
+    if (ready) setReadyPapers(ready);
   };
 
   const handleFileUpload = async (paperId: string, file: File) => {
@@ -135,23 +143,21 @@ const Admin = () => {
   };
 
   const handleGenerateBlog = async () => {
-    if (selectedPapers.length === 0) {
-      toast({ title: "No papers selected", variant: "destructive" });
+    const papersToProcess = readyPapers.length > 0 ? readyPapers.map(p => p.id) : selectedPapers;
+    
+    if (papersToProcess.length === 0) {
+      toast({ title: "No papers ready", variant: "destructive" });
       return;
     }
 
     setIsGenerating(true);
     try {
-      const { data: subjectData } = await supabase
-        .from("subjects")
-        .select("id")
-        .eq("name", selectedSubject)
-        .single();
+      const subjectId = readyPapers.length > 0 ? readyPapers[0].subject_id : null;
 
       const { data, error } = await supabase.functions.invoke("generate-blog-post", {
         body: {
-          paperIds: selectedPapers,
-          subjectId: subjectData?.id,
+          paperIds: papersToProcess,
+          subjectId: subjectId,
         },
       });
 
@@ -163,6 +169,8 @@ const Admin = () => {
       });
 
       setSelectedPapers([]);
+      setReadyPapers([]);
+      await fetchPendingPapers();
     } catch (error) {
       console.error("Error generating blog:", error);
       toast({
@@ -268,12 +276,14 @@ const Admin = () => {
           </Card>
         )}
 
-        {selectedPapers.length > 0 && (
+        {(selectedPapers.length > 0 || readyPapers.length > 0) && (
           <Card>
             <CardHeader>
               <CardTitle>Generate Blog Post</CardTitle>
               <CardDescription>
-                {selectedPapers.length} papers selected and ready for content generation
+                {readyPapers.length > 0 
+                  ? `${readyPapers.length} papers ready with PDFs uploaded`
+                  : `${selectedPapers.length} papers selected and ready for content generation`}
               </CardDescription>
             </CardHeader>
             <CardContent>
