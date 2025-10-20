@@ -136,7 +136,29 @@ Return your response as JSON with this structure:
         { role: "system", content: "You are an expert science communicator who writes for high school students and non-scientists." },
         { role: "user", content: prompt }
       ],
-      response_format: { type: "json_object" }
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "create_blog_post",
+            description: "Create a science blog post with structured content",
+            parameters: {
+              type: "object",
+              properties: {
+                title: { type: "string", description: "Micro hook title" },
+                subtitle: { type: "string", description: "1-2 line relatable hook" },
+                excerpt: { type: "string", description: "The introduction section" },
+                content: { type: "string", description: "Full HTML content from Body through Citations" },
+                reading_time_minutes: { type: "integer", description: "Estimated reading time" },
+                word_count: { type: "integer", description: "Total word count" }
+              },
+              required: ["title", "subtitle", "excerpt", "content", "reading_time_minutes", "word_count"],
+              additionalProperties: false
+            }
+          }
+        }
+      ],
+      tool_choice: { type: "function", function: { name: "create_blog_post" } }
     }),
   });
 
@@ -147,7 +169,13 @@ Return your response as JSON with this structure:
   }
 
   const data = await response.json();
-  const generatedContent = JSON.parse(data.choices[0].message.content);
+  const toolCall = data.choices[0].message.tool_calls?.[0];
+  
+  if (!toolCall || !toolCall.function.arguments) {
+    throw new Error("No tool call returned from AI");
+  }
+
+  const generatedContent = JSON.parse(toolCall.function.arguments);
   
   return generatedContent;
 }
@@ -183,37 +211,45 @@ serve(async (req) => {
 
     // Generate a separate blog post for each paper
     for (const paper of papers) {
-      console.log(`Generating blog post for paper: ${paper.id}`);
-      
-      const generatedContent = await generateContent(paper);
-      
-      const readTime = generatedContent.reading_time_minutes || Math.ceil(generatedContent.content.split(' ').length / 200);
+      try {
+        console.log(`Generating blog post for paper: ${paper.id}`);
+        
+        const generatedContent = await generateContent(paper);
+        
+        const readTime = generatedContent.reading_time_minutes || Math.ceil(generatedContent.content.split(' ').length / 200);
 
-      const { data: blogPost, error: blogError } = await supabase
-        .from('blog_posts')
-        .insert({
-          subject_id: subjectId || paper.subject_id,
-          title: generatedContent.title,
-          subtitle: generatedContent.subtitle,
-          excerpt: generatedContent.excerpt,
-          content: generatedContent.content,
-          read_time: readTime,
-          paper_ids: [paper.id],
-          status: 'draft'
-        })
-        .select()
-        .single();
+        const { data: blogPost, error: blogError } = await supabase
+          .from('blog_posts')
+          .insert({
+            subject_id: subjectId || paper.subject_id,
+            title: generatedContent.title,
+            subtitle: generatedContent.subtitle,
+            excerpt: generatedContent.excerpt,
+            content: generatedContent.content,
+            read_time: readTime,
+            paper_ids: [paper.id],
+            status: 'draft'
+          })
+          .select()
+          .single();
 
-      if (blogError) throw blogError;
+        if (blogError) {
+          console.error(`Failed to insert blog post for paper ${paper.id}:`, blogError);
+          continue;
+        }
 
-      await supabase.from('paper_citations').insert({
-        blog_post_id: blogPost.id,
-        selected_paper_id: paper.id,
-        citation_order: 1
-      });
+        await supabase.from('paper_citations').insert({
+          blog_post_id: blogPost.id,
+          selected_paper_id: paper.id,
+          citation_order: 1
+        });
 
-      createdPosts.push(blogPost);
-      console.log(`Successfully generated blog post: ${blogPost.id}`);
+        createdPosts.push(blogPost);
+        console.log(`Successfully generated blog post: ${blogPost.id}`);
+      } catch (error) {
+        console.error(`Failed to generate blog post for paper ${paper.id}:`, error);
+        // Continue with next paper instead of failing completely
+      }
     }
 
     return new Response(
