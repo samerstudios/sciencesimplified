@@ -10,14 +10,15 @@ interface ArticleCardProps {
 
 const ArticleCard = ({ article }: ArticleCardProps) => {
   return (
-    <Link to={`/article/${article.id}`}>
-      <Card className="group overflow-hidden border-border bg-card hover:shadow-elegant transition-all duration-300 h-full flex flex-col">
-        <div className="aspect-video overflow-hidden bg-muted">
+    <Link to={`/article/${article.id}`} className="block h-full">
+      <Card className="group overflow-hidden border-border bg-card hover-lift h-full flex flex-col transition-all duration-500">
+        <div className="aspect-video overflow-hidden bg-muted relative">
           <img 
             src={article.image} 
             alt={article.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-card/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
         </div>
         
         <div className="p-6 flex flex-col flex-grow">
@@ -31,7 +32,7 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
             </div>
           </div>
           
-          <h3 className="text-xl font-serif font-bold text-foreground mb-2 group-hover:text-accent transition-colors line-clamp-2">
+          <h3 className="text-xl font-serif font-bold text-foreground mb-2 group-hover:text-accent transition-all duration-300 line-clamp-2">
             {article.title}
           </h3>
           

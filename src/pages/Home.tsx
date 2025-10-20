@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import CategoryFilter from "@/components/CategoryFilter";
 import ArticleCard from "@/components/ArticleCard";
+import SkeletonCard from "@/components/SkeletonCard";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 
@@ -11,6 +12,28 @@ const Home = () => {
   const [articles, setArticles] = useState<any[]>([]);
   const [categories, setCategories] = useState<string[]>(["All"]);
   const [loading, setLoading] = useState(true);
+  const articlesRef = useRef<HTMLDivElement>(null);
+
+  // Intersection Observer for scroll animations
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry, index) => {
+          if (entry.isIntersecting) {
+            setTimeout(() => {
+              entry.target.classList.add('animate-fade-in-up');
+            }, index * 100);
+          }
+        });
+      },
+      { threshold: 0.1 }
+    );
+
+    const cards = articlesRef.current?.querySelectorAll('.article-card');
+    cards?.forEach((card) => observer.observe(card));
+
+    return () => observer.disconnect();
+  }, [articles, selectedCategory]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -76,14 +99,18 @@ const Home = () => {
           />
           
           {loading ? (
-            <div className="flex justify-center py-16">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <div ref={articlesRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <SkeletonCard key={i} />
+              ))}
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-fade-in">
+              <div ref={articlesRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredArticles.map((article) => (
-                  <ArticleCard key={article.id} article={article} />
+                  <div key={article.id} className="article-card opacity-0">
+                    <ArticleCard article={article} />
+                  </div>
                 ))}
               </div>
               
@@ -99,9 +126,9 @@ const Home = () => {
         </div>
       </section>
 
-      <section id="about" className="py-16 md:py-24 bg-secondary/30">
+      <section id="about" className="py-16 md:py-24 bg-secondary/30 animate-fade-in">
         <div className="container mx-auto px-6 lg:px-12">
-          <div className="max-w-3xl mx-auto text-center space-y-6">
+          <div className="max-w-3xl mx-auto text-center space-y-6 animate-fade-in-up">
             <h2 className="text-3xl md:text-4xl font-serif font-bold text-primary">
               Mission Statement
             </h2>

@@ -1,5 +1,6 @@
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Microscope } from "lucide-react";
+import DarkModeToggle from "./DarkModeToggle";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -28,7 +29,7 @@ const Header = () => {
   };
 
   return (
-    <header className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
+    <header className="border-b border-border glass sticky top-0 z-50 transition-all duration-300">
       <div className="container mx-auto px-6 lg:px-12 py-6 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-3 group">
           <div className="p-2 bg-gradient-accent rounded-lg group-hover:scale-105 transition-transform">
@@ -40,25 +41,28 @@ const Header = () => {
           </div>
         </Link>
         
-        <nav className="hidden md:flex items-center gap-8">
-          <button 
-            onClick={handleHome}
-            className="text-sm font-medium text-foreground hover:text-accent transition-colors"
-          >
-            Home
-          </button>
-          <button 
-            onClick={() => scrollToSection('articles')}
-            className="text-sm font-medium text-foreground hover:text-accent transition-colors"
-          >
-            Articles
-          </button>
-          <button 
-            onClick={() => scrollToSection('about')}
-            className="text-sm font-medium text-foreground hover:text-accent transition-colors"
-          >
-            About
-          </button>
+        <nav className="flex items-center gap-6">
+          <div className="hidden md:flex items-center gap-6">
+            <button 
+              onClick={handleHome}
+              className="text-sm font-medium text-foreground hover:text-accent transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-accent after:transition-all after:duration-300"
+            >
+              Home
+            </button>
+            <button 
+              onClick={() => scrollToSection('articles')}
+              className="text-sm font-medium text-foreground hover:text-accent transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-accent after:transition-all after:duration-300"
+            >
+              Articles
+            </button>
+            <button 
+              onClick={() => scrollToSection('about')}
+              className="text-sm font-medium text-foreground hover:text-accent transition-all duration-300 relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-accent after:transition-all after:duration-300"
+            >
+              About
+            </button>
+          </div>
+          <DarkModeToggle />
         </nav>
       </div>
     </header>

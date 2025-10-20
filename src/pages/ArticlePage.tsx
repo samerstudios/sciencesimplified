@@ -2,6 +2,7 @@ import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { ArrowLeft, Clock, Calendar, BookOpen, ExternalLink, Loader2 } from "lucide-react";
 import Header from "@/components/Header";
+import ReadingProgress from "@/components/ReadingProgress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -77,15 +78,19 @@ const ArticlePage = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <ReadingProgress />
       <Header />
       
       <article className="animate-fade-in">
-        {/* Hero Image */}
+        {/* Hero Image with Parallax */}
         <div className="relative h-[50vh] md:h-[60vh] overflow-hidden bg-muted">
           <img 
             src={article.hero_image_url || "/quantum.jpg"} 
             alt={article.title}
             className="w-full h-full object-cover"
+            style={{
+              transform: `translateY(${typeof window !== 'undefined' ? window.scrollY * 0.5 : 0}px)`
+            }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent"></div>
         </div>
@@ -93,7 +98,7 @@ const ArticlePage = () => {
         {/* Article Content */}
         <div className="container mx-auto px-6 lg:px-12 -mt-32 relative z-10">
           <div className="max-w-3xl mx-auto">
-            <div className="bg-card shadow-elegant rounded-lg p-8 md:p-12 mb-12">
+            <div className="bg-card shadow-elegant rounded-lg p-8 md:p-12 mb-12 animate-fade-in-up">
               {/* Back Button */}
               <Link to="/" className="inline-block mb-6">
                 <Button variant="ghost" size="sm" className="gap-2">
@@ -144,7 +149,7 @@ const ArticlePage = () => {
 
               {/* Article Content */}
               <div 
-                className="prose max-w-none
+                className="font-article prose max-w-none
                   [&_h1]:font-serif [&_h1]:font-bold [&_h1]:text-primary
                   [&_h2]:font-serif [&_h2]:font-bold [&_h2]:text-primary [&_h2]:text-2xl md:[&_h2]:text-3xl [&_h2]:mt-6 md:[&_h2]:mt-7 [&_h2]:mb-3 [&_h2]:leading-snug
                   [&_h3]:font-serif [&_h3]:font-bold [&_h3]:text-primary [&_h3]:text-xl md:[&_h3]:text-2xl [&_h3]:mt-5 md:[&_h3]:mt-6 [&_h3]:mb-1.5
