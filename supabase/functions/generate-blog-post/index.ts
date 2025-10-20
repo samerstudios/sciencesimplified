@@ -13,7 +13,14 @@ async function generateContent(papers: any[]): Promise<any> {
     `Paper ${i + 1}: "${p.article_title}"\nAuthors: ${p.authors}\nJournal: ${p.journal_name}\nAbstract: ${p.abstract}\n`
   ).join('\n---\n');
 
-  const prompt = `You are a science communicator writing for high school students and general readers with NO science background. Produce an ENGAGING, STORY-DRIVEN science blog post strictly based on the provided Papers.
+const prompt = `You are a science communicator writing for high school students and general readers with NO science background. Produce an ENGAGING, STORY-DRIVEN science blog post strictly based on the provided Papers.
+
+PAPER SELECTION (CRITICAL)
+- You have been provided with ${papers.length} papers
+- Select the papers that work BEST TOGETHER to tell a cohesive, compelling story
+- You do NOT need to use all papers - prioritize narrative quality over quantity
+- If papers don't naturally connect, focus on the ones that create the strongest narrative
+- In the "sources_used" field, list which papers you incorporated and briefly note why others were excluded (if any)
 
 AUDIENCE & STYLE RULES
 - Reading level: high school (ages 14–18)
@@ -22,6 +29,7 @@ AUDIENCE & STYLE RULES
 - Short paragraphs (2–4 sentences), active voice, conversational tone
 - First person is allowed where it improves relatability
 - Length target: 600–1,000 words (≈5–10 minute read)
+- This should read like an ENGAGING STORY, not a structured academic paper
 
 SOURCE-OF-TRUTH (CRITICAL)
 - Use ONLY information contained in the papers provided below
@@ -59,11 +67,12 @@ EXACT STRUCTURE TO FOLLOW
    - Use one concrete example or metaphor to make it tangible (label as "Analogy:")
 
    <h2>The Discovery & Journey</h2> (200–300 words)
-   - Tell the story using "And, But, Therefore":
-     * AND: Established fact/context
-     * BUT: The surprise or problem
-     * THEREFORE: The outcome/insight
+   - Tell the story as a natural narrative arc with tension and resolution
+   - Start with what scientists knew or believed (context)
+   - Build tension by introducing the surprise, problem, or unexpected finding
+   - Resolve with the discovery and its implications
    - Briefly describe how researchers found the result (methods in plain English)
+   - Keep it flowing naturally - avoid formulaic structures or explicit labels
 
    <h2>What This Means / What's Next</h2> (150–250 words)
    - Translate findings into implications/applications for everyday life or society
@@ -98,7 +107,9 @@ Return your response as JSON with this structure:
   "reading_time_minutes": integer,
   "word_count": integer,
   "tags": ["science", "<domain>", "explain-like-I'm-15"],
-  "sources_used": ["<first author year>", "..."]
+  "sources_used": ["<first author year>", "..."],
+  "papers_used_count": integer,
+  "selection_reasoning": "Brief explanation of which papers were used and why they work together (1-2 sentences)"
 }`;
 
   const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
