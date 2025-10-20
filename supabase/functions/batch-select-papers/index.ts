@@ -171,46 +171,43 @@ Deno.serve(async (req) => {
 
           // Use AI to select the best paper
           const lovableApiKey = Deno.env.get('LOVABLE_API_KEY')!;
-          const aiResponse = await fetch('https://api.lovable.app/v1/ai-generations', {
+          const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${lovableApiKey}`,
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              model: 'openai/gpt-5',
-              messages: [{
-                role: 'user',
-                content: `You are a science editor selecting the single most important and exciting research paper from the following list for the subject "${subject.name}".
+              model: 'google/gemini-2.5-flash',
+              messages: [
+                {
+                  role: 'system',
+                  content: `You are a scientific research expert. Select the single most important and compelling research paper from the provided list based on these criteria:
+1. Papers from the following journals are preferred: ${relevantJournals.join(', ')}
+2. Novelty and breakthrough potential
+3. Real-world impact and applications
+4. Scientific rigor and methodology
+5. Timeliness and relevance to current research trends
 
-Relevant high-impact journals for this field: ${relevantJournals.join(', ')}
+You must respond with ONLY a valid JSON object containing the PubMed ID of the selected paper, with no additional text before or after.`
+                },
+                {
+                  role: 'user',
+                  content: `Select the best paper from this list and respond with ONLY a JSON object in this exact format: {"pubmedId": "12345678"}
 
-Selection criteria:
-1. Groundbreaking discoveries or significant advances
-2. Published in prestigious journals (especially those listed above)
-3. Clear real-world implications
-4. Novel methodologies or unexpected findings
-5. Potential to change current understanding
-
-Articles:
+Here are the papers:
 ${articles.map((a, i) => `
-${i + 1}. ${a.title}
-Authors: ${a.authors}
+Paper ${i + 1}:
+Title: ${a.title}
 Journal: ${a.journal}
 Abstract: ${a.abstract}
-DOI: ${a.doi}
 PubMed ID: ${a.pubmedId}
-`).join('\n')}
-
-Return ONLY a JSON object with this structure:
-{
-  "selectedIndex": <number>,
-  "reasoning": "<brief explanation>"
-}
-
-The selectedIndex should be the number (1-based) of the chosen article.`
-              }]
-            })
+DOI: ${a.doi || 'N/A'}
+Publication Date: ${a.pubDate || 'N/A'}
+`).join('\n---\n')}`
+                }
+              ]
+            }),
           });
 
           if (!aiResponse.ok) {
@@ -220,8 +217,14 @@ The selectedIndex should be the number (1-based) of the chosen article.`
 
           const aiData = await aiResponse.json();
           const aiContent = aiData.choices[0].message.content;
-          const selection = JSON.parse(aiContent);
-          const selectedArticle = articles[selection.selectedIndex - 1];
+          
+          // Parse the JSON response to get the selected PubMed ID
+          const selection = JSON.parse(aiContent.trim());
+          const selectedArticle = articles.find(a => a.pubmedId === selection.pubmedId);
+          
+          if (!selectedArticle) {
+            throw new Error(`Selected PubMed ID ${selection.pubmedId} not found in articles list`);
+          }
 
           console.log(`Selected article: ${selectedArticle.title}`);
 
