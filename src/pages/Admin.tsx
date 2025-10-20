@@ -21,20 +21,23 @@ const Admin = () => {
   const [publishingPosts, setPublishingPosts] = useState<Set<string>>(new Set());
   const [uploadingPapers, setUploadingPapers] = useState<Set<string>>(new Set());
   const [previewPost, setPreviewPost] = useState<any>(null);
+  const [subjects, setSubjects] = useState<any[]>([]);
   const { toast } = useToast();
 
-  const subjects = [
-    { id: "neuroscience", name: "Neuroscience" },
-    { id: "immunology", name: "Immunology" },
-    { id: "cancer", name: "Cancer Research" },
-    { id: "genetics", name: "Genetics" },
-    { id: "climate", name: "Climate Science" },
-  ];
-
   useEffect(() => {
+    fetchSubjects();
     fetchPendingPapers();
     fetchDraftPosts();
   }, []);
+
+  const fetchSubjects = async () => {
+    const { data } = await supabase
+      .from("subjects")
+      .select("id, name")
+      .order("name");
+    
+    if (data) setSubjects(data);
+  };
 
   const fetchPendingPapers = async () => {
     const { data: pending } = await supabase
@@ -247,7 +250,7 @@ const Admin = () => {
               <SelectTrigger>
                 <SelectValue placeholder="Select a subject" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-background">
                 {subjects.map((subject) => (
                   <SelectItem key={subject.id} value={subject.name}>
                     {subject.name}
