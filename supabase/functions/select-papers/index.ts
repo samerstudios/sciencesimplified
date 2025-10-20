@@ -84,22 +84,32 @@ serve(async (req) => {
       throw new Error('Subject not found');
     }
 
-    // Get all journals for this subject (including interdisciplinary ones)
+    // Get all journals for this subject (including interdisciplinary ones) with impact factors
     const { data: journalRelations } = await supabase
       .from('journal_subjects')
-      .select('journal_id, journals(name)')
+      .select('journal_id, journals(name, impact_factor)')
       .eq('subject_id', subjectId);
     
     // Also get interdisciplinary journals (Science, Nature, Cell)
     const { data: interdisciplinaryJournals } = await supabase
       .from('journals')
-      .select('name')
+      .select('name, impact_factor')
       .eq('is_interdisciplinary', true);
 
-    const journalNames = [
-      ...(journalRelations?.map((rel: any) => rel.journals?.name).filter(Boolean) || []),
-      ...(interdisciplinaryJournals?.map((j: any) => j.name).filter(Boolean) || [])
-    ];
+    // Create a map of journal names to impact factors
+    const journalImpactMap = new Map<string, number>();
+    journalRelations?.forEach((rel: any) => {
+      if (rel.journals?.name) {
+        journalImpactMap.set(rel.journals.name, rel.journals.impact_factor || 0);
+      }
+    });
+    interdisciplinaryJournals?.forEach((j: any) => {
+      if (j.name) {
+        journalImpactMap.set(j.name, j.impact_factor || 0);
+      }
+    });
+
+    const journalNames = Array.from(journalImpactMap.keys());
 
     console.log(`Found ${journalNames.length} journals for ${subject.name}`);
 
@@ -116,7 +126,15 @@ serve(async (req) => {
     
     const articles = await searchPubMed(searchQuery, startDateStr, endDateStr);
     
-    console.log(`Found ${articles.length} papers, sending to AI for selection...`);
+    // Sort articles by impact factor (highest first)
+    const sortedArticles = articles
+      .map(article => ({
+        ...article,
+        impactFactor: journalImpactMap.get(article.journal) || 0
+      }))
+      .sort((a, b) => b.impactFactor - a.impactFactor);
+    
+    console.log(`Found ${sortedArticles.length} papers, sorted by impact factor, sending to AI for thematic selection...`);
     
     // Use AI to select 1-5 most compelling papers
     const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
@@ -126,11 +144,11 @@ serve(async (req) => {
 
     const aiPrompt = `You are a science editor curating papers for a general audience blog post about ${subject.name}.
 
-Review these ${articles.length} research paper abstracts and select exactly 5 papers that share a SIMILAR SUBJECT or theme.
+Review these ${sortedArticles.length} research paper abstracts (already sorted by journal impact factor, highest first) and select exactly 5 papers that share a SIMILAR SUBJECT or theme.
 
 CRITICAL SELECTION CRITERIA (in order of priority):
 1. THEMATIC SIMILARITY: Papers must be along the same subject/theme - they should naturally complement each other
-2. JOURNAL TIER: Prioritize papers from highest-impact journals (Nature, Science, Cell, and other top-tier journals)
+2. FAVOR HIGH-IMPACT JOURNALS: Papers earlier in the list are from higher-impact journals - prefer these when possible
 3. SCIENTIFIC SIGNIFICANCE: Novel, impactful findings
 4. PUBLIC INTEREST: Topics accessible and interesting to a general audience
 
@@ -139,12 +157,12 @@ Your goal is to select papers that naturally work together because they explore 
 Return ONLY a JSON array of exactly 5 selected paper PMIDs (the pmid field). Example format:
 ["12345678", "87654321", "11223344", "99887766", "55443322"]
 
-Here are the papers:
-${articles.map((a, i) => `
+Here are the papers (sorted by impact factor):
+${sortedArticles.map((a, i) => `
 Paper ${i + 1}:
 PMID: ${a.pmid}
 Title: ${a.title}
-Journal: ${a.journal}
+Journal: ${a.journal} (Impact Factor: ${a.impactFactor > 0 ? a.impactFactor : 'N/A'})
 Authors: ${a.authors}
 Abstract: ${a.abstract}
 ---`).join('\n')}`;
@@ -183,7 +201,7 @@ Abstract: ${a.abstract}
     console.log(`AI selected ${selectedPmids.length} papers:`, selectedPmids);
     
     // Filter articles to only include AI-selected ones
-    const aiSelectedArticles = articles.filter(a => selectedPmids.includes(a.pmid));
+    const aiSelectedArticles = sortedArticles.filter(a => selectedPmids.includes(a.pmid));
     
     if (aiSelectedArticles.length === 0) {
       throw new Error('No papers matched AI selection');
