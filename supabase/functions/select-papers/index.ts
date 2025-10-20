@@ -36,11 +36,22 @@ function parsePubMedXML(xml: string): PubMedArticle[] {
   const articles: PubMedArticle[] = [];
   const articleMatches = xml.match(/<PubmedArticle>[\s\S]*?<\/PubmedArticle>/g) || [];
   
+  // Helper to decode HTML entities
+  const decodeHTML = (str: string): string => {
+    return str
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&')
+      .replace(/&quot;/g, '"')
+      .replace(/&#(\d+);/g, (match, dec) => String.fromCharCode(dec));
+  };
+  
   for (const articleXml of articleMatches) {
     const pmid = articleXml.match(/<PMID[^>]*>(\d+)<\/PMID>/)?.[1] || '';
-    const title = articleXml.match(/<ArticleTitle>([\s\S]*?)<\/ArticleTitle>/)?.[1] || '';
+    const titleMatch = articleXml.match(/<ArticleTitle>([\s\S]*?)<\/ArticleTitle>/)?.[1] || '';
+    const title = decodeHTML(titleMatch);
     const abstractMatch = articleXml.match(/<AbstractText[^>]*>([\s\S]*?)<\/AbstractText>/);
-    const abstract = abstractMatch ? abstractMatch[1].replace(/<[^>]+>/g, '') : '';
+    const abstract = abstractMatch ? decodeHTML(abstractMatch[1].replace(/<[^>]+>/g, '')) : '';
     
     const authorMatches = articleXml.match(/<Author[^>]*>[\s\S]*?<\/Author>/g) || [];
     const authors = authorMatches.map(author => {

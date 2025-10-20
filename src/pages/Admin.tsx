@@ -282,7 +282,10 @@ const Admin = () => {
               {pendingPapers.map((paper) => (
                 <div key={paper.id} className="p-4 border rounded-lg space-y-2">
                   <div>
-                    <h3 className="font-semibold text-sm">{paper.article_title}</h3>
+                    <h3 
+                      className="font-semibold text-sm"
+                      dangerouslySetInnerHTML={{ __html: paper.article_title }}
+                    />
                     <p className="text-xs text-muted-foreground">{paper.journal_name}</p>
                   </div>
                   <div className="flex items-center gap-2">
