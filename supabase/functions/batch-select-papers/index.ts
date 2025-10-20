@@ -216,7 +216,18 @@ Publication Date: ${a.pubDate || 'N/A'}
           }
 
           const aiData = await aiResponse.json();
-          const aiContent = aiData.choices[0].message.content;
+          let aiContent = aiData.choices[0].message.content;
+          
+          // Remove markdown code fences if present
+          aiContent = aiContent.trim();
+          if (aiContent.startsWith('```json')) {
+            aiContent = aiContent.slice(7); // Remove ```json
+          } else if (aiContent.startsWith('```')) {
+            aiContent = aiContent.slice(3); // Remove ```
+          }
+          if (aiContent.endsWith('```')) {
+            aiContent = aiContent.slice(0, -3); // Remove trailing ```
+          }
           
           // Parse the JSON response to get the selected PubMed ID
           const selection = JSON.parse(aiContent.trim());
