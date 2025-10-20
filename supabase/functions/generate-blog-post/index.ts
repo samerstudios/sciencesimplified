@@ -13,15 +13,28 @@ async function generateContent(papers: any[]): Promise<any> {
     `Paper ${i + 1}: "${p.article_title}"\nAuthors: ${p.authors}\nJournal: ${p.journal_name}\nAbstract: ${p.abstract}\n`
   ).join('\n---\n');
 
-  const prompt = `You are a science communicator writing for a general audience. Based on these recent research papers, create an engaging blog post that:
+  const prompt = `You are a science communicator writing for high school students and general readers with NO science background. Based on these recent research papers, create an engaging blog post that:
 
-1. Has a catchy, accessible title
-2. Includes a compelling subtitle
-3. Has a 2-3 sentence excerpt
-4. Contains 1500-2000 words of well-structured content
-5. Explains complex concepts in simple terms
-6. Highlights the significance and real-world implications
-7. Cites each paper naturally throughout the text
+CRITICAL RULES:
+- Write at a high school reading level (ages 14-18)
+- Use ZERO scientific jargon without explanation
+- Replace technical terms with everyday language and relatable analogies
+- Explain concepts like you're talking to a curious friend
+- Use short sentences and common words
+- Make it exciting and relevant to everyday life
+
+STRUCTURE:
+1. Catchy, non-technical title (NO jargon!)
+2. Compelling subtitle that hooks readers
+3. 2-3 sentence excerpt in plain English
+4. 1500-2000 words of clear, engaging content with:
+   - Real-world examples and analogies
+   - "Think of it like..." explanations
+   - Why this matters to regular people
+   - Cite papers naturally but simply
+
+AVOID: Technical terms, complex sentences, assuming scientific knowledge
+USE: Simple metaphors, everyday examples, conversational tone
 
 Papers:
 ${papersContext}
@@ -43,7 +56,7 @@ Return your response as JSON with this structure:
     body: JSON.stringify({
       model: "google/gemini-2.5-flash",
       messages: [
-        { role: "system", content: "You are an expert science communicator who writes engaging blog posts for general audiences." },
+        { role: "system", content: "You are an expert science communicator who writes for high school students and non-scientists. Your writing is clear, jargon-free, and uses everyday language with relatable analogies. You make complex science exciting and accessible." },
         { role: "user", content: prompt }
       ],
       response_format: { type: "json_object" }
