@@ -35,9 +35,9 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
             {article.title}
           </h3>
           
-          <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-grow">
-            {article.excerpt}
-          </p>
+          <p className="text-sm text-muted-foreground mb-4 line-clamp-2 flex-grow"
+             dangerouslySetInnerHTML={{ __html: article.excerpt }}
+          />
           
           <div className="flex items-center justify-between pt-4 border-t border-border">
             <div className="text-xs text-muted-foreground">

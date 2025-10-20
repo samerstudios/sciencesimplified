@@ -133,9 +133,13 @@ const ArticlePage = () => {
 
               {/* Excerpt */}
               {article.excerpt && (
-                <div className="text-lg leading-relaxed text-foreground/90 mb-12 pb-8 border-b border-border">
-                  {article.excerpt}
-                </div>
+                <div 
+                  className="text-lg leading-relaxed text-foreground/90 mb-12 pb-8 border-b border-border
+                    prose prose-lg max-w-none
+                    prose-p:text-foreground/90 prose-p:leading-relaxed prose-p:mb-4
+                    [&>br]:block [&>br]:my-2"
+                  dangerouslySetInnerHTML={{ __html: article.excerpt }}
+                />
               )}
 
               {/* Article Content */}
