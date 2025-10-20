@@ -13,133 +13,135 @@ async function generateContent(papers: any[]): Promise<any> {
     `Paper ${i + 1}: "${p.article_title}"\nAuthors: ${p.authors}\nJournal: ${p.journal_name}\nAbstract: ${p.abstract}\n`
   ).join('\n---\n');
 
-const prompt = `You are a world-class science communicator writing for The Atlantic, Wired, or Scientific American. Your readers are curious high school students and general readers with NO science background who want to understand cutting-edge research.
+const prompt = `You are a professional science communicator writing for high school students and general readers with NO science background.
+Your mission is to create an ENGAGING, STORY-DRIVEN blog post based entirely on the provided scientific papers.
 
 ═══════════════════════════════════════════════════
-CRITICAL HTML FORMATTING RULES (NON-NEGOTIABLE)
+AUDIENCE & STYLE
 ═══════════════════════════════════════════════════
 
-EVERY PARAGRAPH = ONE <p> TAG. NO EXCEPTIONS.
-
-❌ WRONG - Multiple sentences without paragraph tags:
-Scientists discovered a new mechanism. This is important. It could change treatment.
-
-✅ CORRECT - Each idea gets its own <p> tag:
-<p>Scientists discovered a new mechanism that nobody expected.</p>
-
-<p>This finding is important because it challenges everything we thought we knew about the disease.</p>
-
-<p>It could fundamentally change how doctors approach treatment in the next decade.</p>
-
-SPACING RULE: The CSS will automatically add spacing between <p> tags. You ONLY need to write proper HTML structure.
+- Audience: intelligent non-experts (ages 14–18 and general readers)
+- Reading level: high school
+- Tone: conversational, clear, curious, story-driven
+- Voice: active, confident, occasionally first-person for warmth
+- Jargon: ZERO unexplained terms — every technical word must be simplified
+- Analogies: encouraged (label as "Analogy:")
+- Paragraphs: 2–3 sentences max
+- Word count: 600–1,000 words (≈5–8 minute read)
+- Write like you're explaining to a curious friend
 
 ═══════════════════════════════════════════════════
-EMPHASIS & VISUAL HIERARCHY
+NARRATIVE STRUCTURE: "AND, BUT, THEREFORE"
 ═══════════════════════════════════════════════════
 
-Use <strong> for KEY concepts, findings, and important terms (sparingly - only 3-5 times per section):
-<p>The researchers found that <strong>GZMK-expressing CD8+ T cells</strong> were the culprits driving recurrent inflammation.</p>
+Tell the research story using this proven structure:
 
-Use <em> when first introducing a technical term before explaining it:
-<p>These <em>memory T cells</em> (immune cells that remember past encounters) were behaving strangely.</p>
+AND: Set up what we knew or believed
+BUT: Introduce the surprise, problem, or gap
+THEREFORE: Reveal the discovery and what it means
 
-═══════════════════════════════════════════════════
-PARAGRAPH LENGTH RULES
-═══════════════════════════════════════════════════
-
-MAXIMUM: 3 sentences per paragraph
-IDEAL: 1-2 sentences per paragraph
-Break up complex ideas into bite-sized chunks
-
-❌ WRONG - Dense paragraph:
-<p>Think about a common cold. You get sick, your body fights it off, and eventually, you get better. But for people with diseases like chronic rhinosinusitis (which means a really long-lasting stuffy nose and sinus pain) or asthma, it's not that simple. These conditions are called inflammatory diseases, and they often come back again and again, even after treatments.</p>
-
-✅ CORRECT - Broken into digestible pieces:
-<p>Think about a common cold. You get sick, your body fights it off, and you get better.</p>
-
-<p>But for people with <em>chronic rhinosinusitis</em> (long-lasting stuffy nose and sinus pain) or asthma, it's not that simple. These conditions keep coming back, even after treatment.</p>
-
-<p>Scientists call these <strong>recurrent inflammatory diseases</strong>, and for years, they've been a mystery.</p>
+This creates natural narrative tension and keeps readers engaged.
 
 ═══════════════════════════════════════════════════
-CONTENT STRUCTURE REQUIREMENTS
+HTML FORMATTING RULES
 ═══════════════════════════════════════════════════
 
-PAPER USAGE (CRITICAL):
-- You have 1 breakthrough paper - explain this ONE discovery
-- No inline citations like "(Author et al., Year)" - full citation at the end only
-- Use ONLY information from the paper provided - no speculation
+EVERY paragraph = ONE <p> tag
+Use semantic class names for styling:
+- <h2 class="post-heading"> for major sections
+- <p class="readable"> for all body text
+- <blockquote class="pull-quote"> for standout sentences (use 1–2 per article)
+- <strong> for key concepts (use sparingly — 3–5 per section)
+- <em> when introducing technical terms
 
-AUDIENCE:
-- Reading level: high school (ages 14-18)
-- ZERO jargon without immediate plain-English explanation
-- Relatable analogies (label as "Analogy:")
-- Conversational, engaging tone (like explaining to a curious friend)
-- Length: 600-1,000 words
+White space rules:
+- Blank line before each <h2> and after <blockquote>
+- Never put more than 3 paragraphs without a visual break
+- Use <hr class="section-divider" /> between major sections
 
 ═══════════════════════════════════════════════════
-EXACT HTML STRUCTURE TO OUTPUT
+REQUIRED STRUCTURE
 ═══════════════════════════════════════════════════
 
-<h2>The Problem / Why Scientists Cared</h2>
+INTRODUCTION (≈100–150 words; 3 paragraphs):
 
-<p>[Hook sentence that sets up the problem]</p>
+<p class="readable">[Open with a relatable scenario, question, or surprising fact]</p>
 
-<p>[Expand on why this problem exists]</p>
+<p class="readable">[Reveal the research insight you'll discuss in plain English]</p>
 
-<p>[Analogy: Real-world comparison that makes it tangible]</p>
+<p class="readable">[Why this discovery matters to the reader's world]</p>
 
-<p>[Why solving this matters - the stakes]</p>
+BODY SECTIONS:
 
-<p>[Impact statistics or broader context]</p>
+<h2 class="post-heading">What's Going On / The Problem</h2>
 
-<h2>The Breakthrough</h2>
+<p class="readable">[AND: Set up the context or established belief]</p>
 
-<p>[What researchers set out to discover]</p>
+<p class="readable">[Explain why this problem exists or why scientists cared]</p>
 
-<p>[Brief description of their approach in plain English]</p>
+<p class="readable">[Use one clear example or Analogy: to make it concrete]</p>
 
-<p>[The key finding - the "aha moment"]</p>
+<h2 class="post-heading">The Discovery</h2>
 
-<p>[Specific evidence or data that proves it]</p>
+<p class="readable">[BUT: Introduce what researchers found that was surprising]</p>
 
-<p>[Why this finding is unexpected or important]</p>
+<p class="readable">[Describe their approach in everyday language]</p>
 
-<p>[Additional supporting findings if relevant]</p>
+<p class="readable">[THEREFORE: The key finding — the "aha moment"]</p>
 
-<p>[Validation through experiments or models]</p>
+<blockquote class="pull-quote">[One memorable sentence capturing the breakthrough]</blockquote>
 
-<h2>What This Means for Us</h2>
+<p class="readable">[Specific evidence or data that proves it]</p>
 
-<p>[Immediate practical implications]</p>
+<p class="readable">[Additional supporting findings if relevant]</p>
 
-<p>[How this could change treatments/technology/understanding]</p>
+<hr class="section-divider" />
 
-<p>[Who benefits from this discovery]</p>
+<h2 class="post-heading">What This Means</h2>
 
-<p>[Timeline for real-world impact]</p>
+<p class="readable">[Translate findings into real-world implications]</p>
 
-<p><strong>Limitations:</strong> [What questions remain unanswered]</p>
+<p class="readable">[How this could change treatments/technology/understanding]</p>
 
-<p><strong>What's next:</strong> [Future research directions]</p>
+<p class="readable">[Who benefits and when]</p>
 
-<h2>Conclusion</h2>
+<p class="readable"><strong>Limitations:</strong> [What questions remain — be honest about uncertainty]</p>
 
-<p>[One-sentence recap of the breakthrough and why it matters]</p>
+<p class="readable"><strong>What's next:</strong> [Future research directions that spark curiosity]</p>
 
-<p>[Forward-looking statement about impact]</p>
+CONCLUSION:
 
-<h2>Key Terms</h2>
+<h2 class="post-heading">The Takeaway</h2>
 
+<p class="readable">[One-sentence recap of the breakthrough and its significance]</p>
+
+<p class="readable">[Why it matters to the reader — give them something to think about]</p>
+
+KEY TERMS & CITATION:
+
+<aside class="glossary">
+<h3>Key Terms</h3>
 <ul>
 <li><strong>Term 1:</strong> Plain English definition</li>
 <li><strong>Term 2:</strong> Plain English definition</li>
 <li><strong>Term 3:</strong> Plain English definition</li>
 </ul>
+</aside>
 
-<h2>Citation</h2>
+<div class="further-reading">
+<h3>Citation</h3>
+<p>[Authors] ([Year]). [Title]. <em>[Journal]</em>. DOI: <a href="[doi_url]" target="_blank">[doi]</a></p>
+</div>
 
-<p>[Authors]. ([Year]). [Title]. <em>[Journal]</em>. DOI: [doi]</p>
+═══════════════════════════════════════════════════
+CRITICAL CONSTRAINTS
+═══════════════════════════════════════════════════
+
+- Use ONLY information from the papers provided
+- Do NOT fabricate data, quotes, or names
+- If something is unclear, acknowledge it gracefully
+- Every claim must be traceable
+- No inline citations like "(Author et al., Year)"
 
 ═══════════════════════════════════════════════════
 
@@ -148,14 +150,14 @@ ${papersContext}
 
 Return your response as JSON with this structure:
 {
-  "title": "string (micro hook title)",
-  "subtitle": "string (1-2 line relatable hook)", 
-  "excerpt": "string (the introduction section)",
-  "content": "string (full HTML starting from Body section through Citations, with proper <h2>, <h3>, <p>, <strong>, <ul>, <a> tags)",
+  "title": "string (clear, benefit-oriented or curiosity-driven — no jargon)",
+  "subtitle": "string (1-2 lines with emotional or practical relevance)", 
+  "excerpt": "string (the full introduction section as HTML)",
+  "content": "string (full HTML body starting from first <h2> through citation, with all proper tags and class names)",
   "reading_time_minutes": integer,
   "word_count": integer,
-  "tags": ["science", "<domain>", "explain-like-I'm-15"],
-  "sources_used": ["<first author year>"]
+  "tags": ["science", "<topic>", "storytelling"],
+  "sources_used": ["<FirstAuthor_Year>"]
 }`;
 
   const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
