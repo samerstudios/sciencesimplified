@@ -15,6 +15,8 @@ const Admin = () => {
   const [selectedPapers, setSelectedPapers] = useState<string[]>([]);
   const [pendingPapers, setPendingPapers] = useState<any[]>([]);
   const [readyPapers, setReadyPapers] = useState<any[]>([]);
+  const [draftPosts, setDraftPosts] = useState<any[]>([]);
+  const [publishingPosts, setPublishingPosts] = useState<Set<string>>(new Set());
   const [uploadingPapers, setUploadingPapers] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
@@ -28,6 +30,7 @@ const Admin = () => {
 
   useEffect(() => {
     fetchPendingPapers();
+    fetchDraftPosts();
   }, []);
 
   const fetchPendingPapers = async () => {
@@ -45,6 +48,16 @@ const Admin = () => {
     
     if (pending) setPendingPapers(pending);
     if (ready) setReadyPapers(ready);
+  };
+
+  const fetchDraftPosts = async () => {
+    const { data } = await supabase
+      .from("blog_posts")
+      .select("*")
+      .eq("status", "draft")
+      .order("created_at", { ascending: false });
+    
+    if (data) setDraftPosts(data);
   };
 
   const handleFileUpload = async (paperId: string, file: File) => {
@@ -171,6 +184,7 @@ const Admin = () => {
       setSelectedPapers([]);
       setReadyPapers([]);
       await fetchPendingPapers();
+      await fetchDraftPosts();
     } catch (error) {
       console.error("Error generating blog:", error);
       toast({
@@ -295,6 +309,81 @@ const Admin = () => {
                 {isGenerating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isGenerating ? "Generating..." : "Generate Blog Post with AI"}
               </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {draftPosts.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Draft Posts</CardTitle>
+              <CardDescription>
+                {draftPosts.length} draft blog posts ready to publish
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {draftPosts.map((post) => (
+                <div key={post.id} className="p-4 border rounded-lg space-y-2">
+                  <div>
+                    <h3 className="font-semibold">{post.title}</h3>
+                    <p className="text-sm text-muted-foreground">{post.subtitle}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Created: {new Date(post.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <Button
+                    onClick={async () => {
+                      setPublishingPosts(prev => new Set(prev).add(post.id));
+                      try {
+                        const { error } = await supabase
+                          .from("blog_posts")
+                          .update({ 
+                            status: "published",
+                            publish_date: new Date().toISOString()
+                          })
+                          .eq("id", post.id);
+
+                        if (error) throw error;
+
+                        toast({
+                          title: "Post published!",
+                          description: "The blog post is now live",
+                        });
+
+                        await fetchDraftPosts();
+                      } catch (error) {
+                        console.error("Publish error:", error);
+                        toast({
+                          title: "Publish failed",
+                          description: error instanceof Error ? error.message : "Unknown error",
+                          variant: "destructive",
+                        });
+                      } finally {
+                        setPublishingPosts(prev => {
+                          const next = new Set(prev);
+                          next.delete(post.id);
+                          return next;
+                        });
+                      }
+                    }}
+                    disabled={publishingPosts.has(post.id)}
+                    size="sm"
+                    className="w-full"
+                  >
+                    {publishingPosts.has(post.id) ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Publishing...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="mr-2 h-4 w-4" />
+                        Publish Post
+                      </>
+                    )}
+                  </Button>
+                </div>
+              ))}
             </CardContent>
           </Card>
         )}
