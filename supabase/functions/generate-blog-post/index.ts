@@ -16,12 +16,12 @@ async function generateContent(papers: any[]): Promise<any> {
   const prompt = `You are a science communicator writing for high school students and general readers with NO science background. Produce an ENGAGING, STORY-DRIVEN science blog post strictly based on the provided Papers.
 
 AUDIENCE & STYLE RULES
-- Reading level: high school (ages 14–18)
+- Reading level: high school (ages 14-18)
 - Use ZERO jargon without an immediate plain-English explanation
 - Prefer everyday language and relatable analogies (label analogies clearly as "Analogy:")
-- Short paragraphs (2–4 sentences), active voice, conversational tone
+- Short paragraphs (2-4 sentences), active voice, conversational tone
 - First person is allowed where it improves relatability
-- Length target: 600–1,000 words (≈5–10 minute read)
+- Length target: 600-1,000 words (approximately 5-10 minute read)
 
 SOURCE-OF-TRUTH
 - Use ONLY information contained in the papers below
@@ -42,25 +42,25 @@ EXACT STRUCTURE TO FOLLOW (INTERNAL GUIDANCE - DO NOT OUTPUT THESE SECTION LABEL
    - Clear, benefit-oriented or curiosity-driven
    - Grab attention immediately; no jargon
 
-2. SUBTITLE (1–2 line Relatable Hook)
+2. SUBTITLE (1-2 line Relatable Hook)
    - Quick personal/immediate touch OR surprising fact
    - Make it relevant to the reader's life
 
-3. INTRODUCTION (100–150 words, 3 paragraphs)
+3. INTRODUCTION (100-150 words, 3 paragraphs)
    Paragraph 1: Scenario, question, anecdote, or surprising stat the reader can feel
    Paragraph 2: Briefly reveal the research/insight you'll discuss
    Paragraph 3: What the reader will get—why it's worth their time
 
-4. BODY (400–700 words) — Create natural <h2> headings that fit the story:
+4. BODY (400-700 words) — Create natural <h2> headings that fit the story:
    
-   Section A (150–200 words) - INTERNAL PURPOSE: "What's Going On / Why It Matters"
+   Section A (150-200 words) - INTERNAL PURPOSE: "What's Going On / Why It Matters"
       - Set up the problem, gap, or paradox
       - Introduce the study in everyday language
       - Show the status quo
       - Use one concrete example or metaphor (label as "Analogy:")
       - Give this section a natural heading, NOT "What's Going On / Why It Matters"
    
-   Section B (200–300 words) - INTERNAL PURPOSE: "The Discovery & Journey"
+   Section B (200-300 words) - INTERNAL PURPOSE: "The Discovery & Journey"
       - Tell the story using "And, But, Therefore":
         * AND: Established fact/context
         * BUT: The surprise or problem
@@ -68,20 +68,20 @@ EXACT STRUCTURE TO FOLLOW (INTERNAL GUIDANCE - DO NOT OUTPUT THESE SECTION LABEL
       - Briefly describe how researchers found the result (methods in plain English)
       - Give this section a natural heading, NOT "The Discovery & Journey"
    
-   Section C (150–250 words) - INTERNAL PURPOSE: "What This Means / What's Next"
+   Section C (150-250 words) - INTERNAL PURPOSE: "What This Means / What's Next"
       - Translate findings into implications/applications for everyday life or society
-      - Include "Limits of this study" (1–3 sentences)
-      - Include "What we still don't know" (1–3 sentences)
+      - Include "Limits of this study" (1-3 sentences)
+      - Include "What we still don't know" (1-3 sentences)
       - Offer a small "Try this / Think about this" takeaway for the reader
       - Give this section a natural heading, NOT "What This Means / What's Next"
 
-5. CONCLUSION + CALL-TO-ACTION (50–100 words)
+5. CONCLUSION + CALL-TO-ACTION (50-100 words)
    - One-sentence recap of the main insight
    - Why it matters for the reader
    - Simple invitation: comment, share, read the paper, or explore further
 
 6. KEY TERMS (Plain English mini-glossary)
-   - Provide 3–6 brief definitions for any unavoidable technical terms
+   - Provide 3-6 brief definitions for any unavoidable technical terms
    - Format as a simple list with <h3>Key Terms</h3>
 
 7. CITATIONS
@@ -159,7 +159,7 @@ serve(async (req) => {
 
     const generatedContent = await generateContent(papers);
     
-    const readTime = Math.ceil(generatedContent.content.split(' ').length / 200);
+    const readTime = generatedContent.reading_time_minutes || Math.ceil(generatedContent.content.split(' ').length / 200);
 
     const { data: blogPost, error: blogError } = await supabase
       .from('blog_posts')
