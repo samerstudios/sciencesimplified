@@ -144,18 +144,18 @@ const ArticlePage = () => {
 
               {/* Article Content */}
               <div 
-                className="prose prose-lg md:prose-xl max-w-none
+                className="prose max-w-none
                   prose-headings:font-serif prose-headings:font-bold prose-headings:text-primary
-                  prose-h2:!text-5xl md:prose-h2:!text-6xl prose-h2:!mt-16 prose-h2:!mb-4 prose-h2:!leading-tight
-                  prose-h3:!text-3xl md:prose-h3:!text-4xl prose-h3:!mt-12 prose-h3:!mb-3
-                  prose-p:text-foreground/90 prose-p:leading-relaxed prose-p:mb-4
+                  prose-h2:text-[3rem] md:prose-h2:text-[3.75rem] prose-h2:mt-16 prose-h2:mb-4 prose-h2:leading-tight
+                  prose-h3:text-[2rem] md:prose-h3:text-[2.5rem] prose-h3:mt-12 prose-h3:mb-3
+                  prose-p:text-lg prose-p:text-foreground/90 prose-p:leading-relaxed prose-p:mb-4
                   prose-strong:text-foreground prose-strong:font-semibold
                   prose-em:text-foreground/80
                   prose-blockquote:border-l-4 prose-blockquote:border-accent prose-blockquote:pl-6 
                   prose-blockquote:py-4 prose-blockquote:my-8 prose-blockquote:italic 
                   prose-blockquote:text-xl prose-blockquote:text-foreground/80
-                  prose-ul:my-8 prose-ul:space-y-2
-                  prose-ol:my-8 prose-ol:space-y-2
+                  prose-ul:my-8 prose-ul:space-y-2 prose-ul:text-lg
+                  prose-ol:my-8 prose-ol:space-y-2 prose-ol:text-lg
                   prose-li:text-foreground/90
                   prose-hr:my-12 prose-hr:border-border
                   prose-a:text-accent prose-a:no-underline hover:prose-a:underline
