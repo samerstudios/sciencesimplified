@@ -6,14 +6,12 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-async function generateContent(papers: any[]): Promise<any> {
+async function generateContent(paper: any): Promise<any> {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   
-  const papersContext = papers.map((p, i) => 
-    `Paper ${i + 1}: "${p.article_title}"\nAuthors: ${p.authors}\nJournal: ${p.journal_name}\nDOI: ${p.doi}\nAbstract: ${p.abstract}\n`
-  ).join('\n---\n');
+  const paperContext = `Paper: "${paper.article_title}"\nAuthors: ${paper.authors}\nJournal: ${paper.journal_name}\nDOI: ${paper.doi}\nAbstract: ${paper.abstract}\n`;
 
-  const prompt = `You are a science communicator writing for high school students and general readers with NO science background. Produce an ENGAGING, STORY-DRIVEN science blog post strictly based on the provided Papers.
+  const prompt = `You are a science communicator writing for high school students and general readers with NO science background. Produce an ENGAGING, STORY-DRIVEN science blog post strictly based on the provided Paper.
 
 AUDIENCE & STYLE RULES
 - Reading level: high school (ages 14-18)
@@ -113,8 +111,8 @@ EXACT STRUCTURE TO FOLLOW (INTERNAL GUIDANCE - DO NOT OUTPUT THESE SECTION LABEL
    - Use only ONE <br> after the <h3> header (not <br><br>)
    - NO inline citations in the body text
 
-Papers:
-${papersContext}
+Paper:
+${paperContext}
 
 Return your response as JSON with this structure:
 {
@@ -171,7 +169,7 @@ serve(async (req) => {
       throw new Error('No paper IDs provided');
     }
 
-    console.log(`Generating blog post for ${paperIds.length} papers`);
+    console.log(`Generating blog posts for ${paperIds.length} papers`);
 
     const { data: papers, error: papersError } = await supabase
       .from('selected_papers')
@@ -181,39 +179,45 @@ serve(async (req) => {
     if (papersError) throw papersError;
     if (!papers || papers.length === 0) throw new Error('Papers not found');
 
-    const generatedContent = await generateContent(papers);
-    
-    const readTime = generatedContent.reading_time_minutes || Math.ceil(generatedContent.content.split(' ').length / 200);
+    const createdPosts = [];
 
-    const { data: blogPost, error: blogError } = await supabase
-      .from('blog_posts')
-      .insert({
-        subject_id: subjectId,
-        title: generatedContent.title,
-        subtitle: generatedContent.subtitle,
-        excerpt: generatedContent.excerpt,
-        content: generatedContent.content,
-        read_time: readTime,
-        paper_ids: paperIds,
-        status: 'draft'
-      })
-      .select()
-      .single();
+    // Generate a separate blog post for each paper
+    for (const paper of papers) {
+      console.log(`Generating blog post for paper: ${paper.id}`);
+      
+      const generatedContent = await generateContent(paper);
+      
+      const readTime = generatedContent.reading_time_minutes || Math.ceil(generatedContent.content.split(' ').length / 200);
 
-    if (blogError) throw blogError;
+      const { data: blogPost, error: blogError } = await supabase
+        .from('blog_posts')
+        .insert({
+          subject_id: subjectId || paper.subject_id,
+          title: generatedContent.title,
+          subtitle: generatedContent.subtitle,
+          excerpt: generatedContent.excerpt,
+          content: generatedContent.content,
+          read_time: readTime,
+          paper_ids: [paper.id],
+          status: 'draft'
+        })
+        .select()
+        .single();
 
-    const citations = paperIds.map((paperId: string, index: number) => ({
-      blog_post_id: blogPost.id,
-      selected_paper_id: paperId,
-      citation_order: index + 1
-    }));
+      if (blogError) throw blogError;
 
-    await supabase.from('paper_citations').insert(citations);
+      await supabase.from('paper_citations').insert({
+        blog_post_id: blogPost.id,
+        selected_paper_id: paper.id,
+        citation_order: 1
+      });
 
-    console.log(`Successfully generated blog post: ${blogPost.id}`);
+      createdPosts.push(blogPost);
+      console.log(`Successfully generated blog post: ${blogPost.id}`);
+    }
 
     return new Response(
-      JSON.stringify({ success: true, blogPost }),
+      JSON.stringify({ success: true, blogPosts: createdPosts, count: createdPosts.length }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
