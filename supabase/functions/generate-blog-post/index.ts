@@ -33,7 +33,7 @@ SOURCE-OF-TRUTH (CRITICAL)
 - Use ONLY information contained in the papers provided below
 - Do NOT invent facts or numbers
 - If a needed detail is missing, say so briefly and move on. Do not speculate
-- Attribute specific claims to the relevant paper(s) with inline hyperlinks
+- Since you're writing about ONE paper, do NOT include inline citations like "(Author et al., Year)" - the full citation at the end is sufficient
 
 OUTPUT FORMAT
 - Deliver valid HTML only (no Markdown)
@@ -87,8 +87,8 @@ EXACT STRUCTURE TO FOLLOW
    - Provide 3–5 brief definitions for any technical terms used
 
 7. CITATION
-   - Inline: hyperlink author/year or paper title when referencing specific claims
-   - End section: Full citation with authors, year, title, journal, and DOI/URL
+   - Full citation with authors, year, title, journal, and DOI/URL at the end
+   - No inline citations needed since you're discussing a single paper
 
 8. RESPONSIBLE SCIENCE NOTE (if applicable)
    - If topic involves health, environment, or safety, add 1–2 sentences on considerations
