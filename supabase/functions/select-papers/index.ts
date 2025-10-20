@@ -126,16 +126,18 @@ serve(async (req) => {
 
     const aiPrompt = `You are a science editor curating papers for a general audience blog post about ${subject.name}.
 
-Review these ${articles.length} research paper abstracts and select 1-5 papers that would make the most compelling story together.
+Review these ${articles.length} research paper abstracts and select exactly 5 papers that share a SIMILAR SUBJECT or theme.
 
-Consider:
-- Complementary or contrasting findings that create narrative tension
-- Scientific significance and novelty
-- Public interest and accessibility
-- Papers that together tell a cohesive story
+CRITICAL SELECTION CRITERIA (in order of priority):
+1. THEMATIC SIMILARITY: Papers must be along the same subject/theme - they should naturally complement each other
+2. JOURNAL TIER: Prioritize papers from highest-impact journals (Nature, Science, Cell, and other top-tier journals)
+3. SCIENTIFIC SIGNIFICANCE: Novel, impactful findings
+4. PUBLIC INTEREST: Topics accessible and interesting to a general audience
 
-Return ONLY a JSON array of the selected paper PMIDs (the pmid field). Example format:
-["12345678", "87654321", "11223344"]
+Your goal is to select papers that naturally work together because they explore the same or closely related topics, NOT papers that contrast or create tension.
+
+Return ONLY a JSON array of exactly 5 selected paper PMIDs (the pmid field). Example format:
+["12345678", "87654321", "11223344", "99887766", "55443322"]
 
 Here are the papers:
 ${articles.map((a, i) => `

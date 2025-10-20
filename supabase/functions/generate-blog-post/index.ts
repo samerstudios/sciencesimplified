@@ -15,12 +15,11 @@ async function generateContent(papers: any[]): Promise<any> {
 
 const prompt = `You are a science communicator writing for high school students and general readers with NO science background. Produce an ENGAGING, STORY-DRIVEN science blog post strictly based on the provided Papers.
 
-PAPER SELECTION (CRITICAL)
-- You have been provided with ${papers.length} papers
-- Select the papers that work BEST TOGETHER to tell a cohesive, compelling story
-- You do NOT need to use all papers - prioritize narrative quality over quantity
-- If papers don't naturally connect, focus on the ones that create the strongest narrative
-- In the "sources_used" field, list which papers you incorporated and briefly note why others were excluded (if any)
+PAPER USAGE (CRITICAL)
+- You have been provided with ${papers.length} carefully selected papers that share a similar subject/theme
+- You MUST incorporate insights from ALL ${papers.length} papers in your narrative
+- These papers have been pre-selected to work together cohesively
+- Weave all papers together naturally into one compelling story
 
 AUDIENCE & STYLE RULES
 - Reading level: high school (ages 14–18)
@@ -106,10 +105,10 @@ Return your response as JSON with this structure:
   "content": "string (full HTML starting from Body section through Citations, with proper <h2>, <h3>, <p>, <strong>, <ul>, <a> tags)",
   "reading_time_minutes": integer,
   "word_count": integer,
+  "reading_time_minutes": integer,
+  "word_count": integer,
   "tags": ["science", "<domain>", "explain-like-I'm-15"],
-  "sources_used": ["<first author year>", "..."],
-  "papers_used_count": integer,
-  "selection_reasoning": "Brief explanation of which papers were used and why they work together (1-2 sentences)"
+  "sources_used": ["<first author year>", "..."]
 }`;
 
   const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
