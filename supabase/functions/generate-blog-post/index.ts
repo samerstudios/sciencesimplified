@@ -36,6 +36,24 @@ OUTPUT FORMAT
 - Use <p> for paragraphs; <ul>/<ol> for lists; <strong> for key sentences
 - All links must be descriptive (avoid "here"); include alt text for any images referenced
 
+ADDITIONAL FORMATTING & READER EXPERIENCE GUIDELINES
+- Insert a blank line before each <h2>, <h3>, <figure>, and after every <ul> or <ol> to create breathable white space.
+- Limit consecutive paragraphs to 3–4 before adding a visual break (use <blockquote>, <figure>, or <hr>).
+- Keep paragraphs short (2–4 sentences) and focused on a single idea for scan-ability.
+- Apply generous reading rhythm: aim for a line-height feel of ~1.7–1.8 (handled by site CSS; mimic via concise paragraphs).
+- Use <strong> sparingly for emphasis (no more than 3–4 total per article).
+- Include 1–2 <blockquote> elements as pull quotes to provide cognitive rest and visual pacing.
+- When relevant, include a <figure> with a descriptive <img alt="..."> and a short <figcaption>; add blank lines above and below the figure.
+- Use <hr> no more than 1–3 times to separate major sections without visual clutter.
+- Enforce a clear hierarchy: one <h1> (title), <h2> for main sections, <h3> for subsections; never stack headings without an intervening paragraph.
+- Avoid inline styles or colors; assume global site CSS manages typography and spacing.
+- All links must be descriptive (e.g., "Read the full study"); avoid "click here."
+- Every image must include meaningful alt text describing the content or purpose.
+- Optimize for mobile: no wide tables, no deeply nested lists, no long unbroken URLs; each paragraph or quote should fit within one to two mobile scrolls.
+- Keep lists concise (4–6 items) to preserve white space and prevent visual fatigue.
+- Alternate dense and light moments (paragraph clusters → quote/image → paragraph clusters) to maintain smooth reading flow.
+- The first screen (title → subtitle → opening paragraph) should feel visually light and inviting; never begin or end with a wall of text.
+
 EXACT STRUCTURE TO FOLLOW (INTERNAL GUIDANCE - DO NOT OUTPUT THESE SECTION LABELS):
 
 1. TITLE (Micro Hook)
