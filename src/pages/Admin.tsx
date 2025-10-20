@@ -163,7 +163,8 @@ const Admin = () => {
         description: "Paper removed from pending uploads",
       });
 
-      fetchPendingPapers();
+      await fetchPendingPapers();
+      setSelectedPapers(prev => prev.filter(id => id !== paperId));
     } catch (error) {
       console.error("Delete error:", error);
       toast({
@@ -199,7 +200,8 @@ const Admin = () => {
         description: "Paper moved back to pending uploads",
       });
 
-      fetchPendingPapers();
+      await fetchPendingPapers();
+      setSelectedPapers(prev => [...prev, paperId]);
     } catch (error) {
       console.error("Delete error:", error);
       toast({
