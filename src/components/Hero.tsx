@@ -17,7 +17,7 @@ const Hero = () => {
           
           <div className="flex flex-wrap items-center justify-center gap-3 pt-6 text-sm text-muted-foreground">
             <div className="flex items-center gap-2 px-4 py-2 bg-secondary rounded-full">
-              <span className="font-semibold">High Impact Factor</span>
+              <span>High Impact Factor</span>
             </div>
             <div className="flex items-center gap-2 px-4 py-2 bg-secondary rounded-full">
               <span>Peer-Reviewed Journals</span>
