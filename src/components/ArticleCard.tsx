@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Clock, TrendingUp } from "lucide-react";
+import { Clock } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { Article } from "@/data/articles";
@@ -41,11 +41,7 @@ const ArticleCard = ({ article }: ArticleCardProps) => {
           
           <div className="flex items-center justify-between pt-4 border-t border-border">
             <div className="text-xs text-muted-foreground">
-              <span className="font-medium">{article.journal}</span>
-            </div>
-            <div className="flex items-center gap-1 text-xs text-accent">
-              <TrendingUp className="h-3 w-3" />
-              <span className="font-semibold">IF {article.impactFactor}</span>
+              <span className="font-medium">{article.date}</span>
             </div>
           </div>
         </div>

@@ -107,9 +107,8 @@ const Home = () => {
             </h2>
             <p className="text-lg text-muted-foreground leading-relaxed">
               We believe groundbreaking scientific discoveries shouldn't be locked behind jargon and paywalls. 
-              Our team of science communicators carefully selects high-impact research from journals with 
-              impact factors of 20 or higher, then translates complex findings into clear, engaging narratives 
-              that anyone can understand.
+              Our team of science communicators carefully selects high-impact research from leading scientific journals, 
+              then translates complex findings into clear, engaging narratives that anyone can understand.
             </p>
             <p className="text-lg text-muted-foreground leading-relaxed">
               Every article preserves the scientific integrity of the original research while making it 
