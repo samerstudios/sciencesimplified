@@ -19,14 +19,16 @@ const Home = () => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry, index) => {
-          if (entry.isIntersecting) {
+          if (entry.isIntersecting && !entry.target.classList.contains('animate-fade-in-up')) {
             setTimeout(() => {
               entry.target.classList.add('animate-fade-in-up');
+              entry.target.classList.remove('opacity-0');
+              observer.unobserve(entry.target); // Stop observing once animated
             }, index * 100);
           }
         });
       },
-      { threshold: 0.1 }
+      { threshold: 0.1, rootMargin: '50px' }
     );
 
     const cards = articlesRef.current?.querySelectorAll('.article-card');
