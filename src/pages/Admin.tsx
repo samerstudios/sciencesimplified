@@ -149,6 +149,42 @@ const Admin = () => {
     }
   };
 
+  const handleDeletePdf = async (paperId: string, pdfPath: string) => {
+    try {
+      // Delete the file from storage
+      const { error: deleteError } = await supabase.storage
+        .from("research-pdfs")
+        .remove([pdfPath]);
+
+      if (deleteError) throw deleteError;
+
+      // Update the paper status back to pending_pdf
+      const { error: updateError } = await supabase
+        .from("selected_papers")
+        .update({
+          pdf_storage_path: null,
+          status: "pending_pdf"
+        })
+        .eq("id", paperId);
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "PDF deleted successfully",
+        description: "Paper moved back to pending uploads",
+      });
+
+      fetchPendingPapers();
+    } catch (error) {
+      console.error("Delete error:", error);
+      toast({
+        title: "Delete failed",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleSelectPapers = async () => {
     if (selectedSubjects.length === 0) {
       toast({ title: "Please select at least one subject", variant: "destructive" });
@@ -355,7 +391,7 @@ const Admin = () => {
                     <p className="text-xs text-muted-foreground">{paper.journal_name}</p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Label htmlFor={`file-${paper.id}`} className="cursor-pointer">
+                    <Label htmlFor={`file-${paper.id}`} className="cursor-pointer flex-1">
                       <Input
                         id={`file-${paper.id}`}
                         type="file"
@@ -372,6 +408,7 @@ const Admin = () => {
                         size="sm"
                         disabled={uploadingPapers.has(paper.id)}
                         asChild
+                        className="w-full"
                       >
                         <span>
                           {uploadingPapers.has(paper.id) ? (
@@ -384,6 +421,43 @@ const Admin = () => {
                       </Button>
                     </Label>
                   </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
+
+        {readyPapers.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Papers with PDFs</CardTitle>
+              <CardDescription>
+                {readyPapers.length} papers ready with PDFs uploaded
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {readyPapers.map((paper) => (
+                <div key={paper.id} className="p-4 border rounded-lg space-y-2">
+                  <div>
+                    <h3 
+                      className="font-semibold text-sm"
+                      dangerouslySetInnerHTML={{ __html: paper.article_title }}
+                    />
+                    <p className="text-xs text-muted-foreground">{paper.journal_name}</p>
+                    <div className="flex items-center gap-2 mt-2">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <p className="text-xs text-green-600">PDF uploaded</p>
+                    </div>
+                  </div>
+                  <Button
+                    onClick={() => handleDeletePdf(paper.id, paper.pdf_storage_path)}
+                    variant="destructive"
+                    size="sm"
+                    className="w-full"
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Delete PDF
+                  </Button>
                 </div>
               ))}
             </CardContent>
