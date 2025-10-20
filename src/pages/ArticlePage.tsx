@@ -122,11 +122,11 @@ const ArticlePage = () => {
               </div>
 
               {/* Title & Subtitle */}
-              <h1 className="text-4xl md:text-5xl font-serif font-bold text-primary mb-4 leading-tight">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-serif font-bold text-primary mb-4 leading-tight">
                 {article.title}
               </h1>
               {article.subtitle && (
-                <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
+                <p className="text-lg md:text-xl text-muted-foreground mb-8 leading-relaxed">
                   {article.subtitle}
                 </p>
               )}
@@ -134,10 +134,10 @@ const ArticlePage = () => {
               {/* Excerpt */}
               {article.excerpt && (
                 <div 
-                  className="text-lg leading-relaxed text-foreground/90 mb-12 pb-8 border-b border-border
-                    prose prose-lg max-w-none
-                    prose-p:text-foreground/90 prose-p:leading-relaxed prose-p:mb-4
-                    [&>br]:block [&>br]:my-2"
+                  className="text-base md:text-lg leading-relaxed md:leading-loose text-foreground/90 mb-10 md:mb-12 pb-8 border-b border-border
+                    prose max-w-none
+                    [&_p]:text-base md:[&_p]:text-lg [&_p]:text-foreground/90 [&_p]:leading-relaxed md:[&_p]:leading-loose [&_p]:mb-5
+                    [&_br]:block [&_br]:my-3"
                   dangerouslySetInnerHTML={{ __html: article.excerpt }}
                 />
               )}
@@ -146,20 +146,20 @@ const ArticlePage = () => {
               <div 
                 className="prose max-w-none
                   [&_h1]:font-serif [&_h1]:font-bold [&_h1]:text-primary
-                  [&_h2]:font-serif [&_h2]:font-bold [&_h2]:text-primary [&_h2]:text-3xl md:[&_h2]:text-4xl [&_h2]:mt-16 [&_h2]:mb-2 [&_h2]:leading-tight
-                  [&_h3]:font-serif [&_h3]:font-bold [&_h3]:text-primary [&_h3]:text-2xl md:[&_h3]:text-3xl [&_h3]:mt-12 [&_h3]:mb-2
-                  [&_p]:text-lg [&_p]:text-foreground/90 [&_p]:leading-relaxed [&_p]:mb-4
+                  [&_h2]:font-serif [&_h2]:font-bold [&_h2]:text-primary [&_h2]:text-2xl md:[&_h2]:text-3xl [&_h2]:mt-12 md:[&_h2]:mt-16 [&_h2]:mb-3 [&_h2]:leading-snug
+                  [&_h3]:font-serif [&_h3]:font-bold [&_h3]:text-primary [&_h3]:text-xl md:[&_h3]:text-2xl [&_h3]:mt-8 md:[&_h3]:mt-10 [&_h3]:mb-3
+                  [&_p]:text-base md:[&_p]:text-lg [&_p]:text-foreground/90 [&_p]:leading-relaxed md:[&_p]:leading-loose [&_p]:mb-5
                   [&_strong]:text-foreground [&_strong]:font-semibold
                   [&_em]:text-foreground/80
-                  [&_blockquote]:border-l-4 [&_blockquote]:border-accent [&_blockquote]:pl-6 
-                  [&_blockquote]:py-4 [&_blockquote]:my-8 [&_blockquote]:italic 
-                  [&_blockquote]:text-xl [&_blockquote]:text-foreground/80
-                  [&_ul]:my-8 [&_ul]:space-y-2 [&_ul]:text-lg
-                  [&_ol]:my-8 [&_ol]:space-y-2 [&_ol]:text-lg
-                  [&_li]:text-foreground/90
-                  [&_hr]:my-12 [&_hr]:border-border
-                  [&_a]:text-accent [&_a]:no-underline hover:[&_a]:underline
-                  [&_br]:block [&_br]:my-4"
+                  [&_blockquote]:border-l-4 [&_blockquote]:border-accent [&_blockquote]:pl-4 md:[&_blockquote]:pl-6 
+                  [&_blockquote]:py-3 md:[&_blockquote]:py-4 [&_blockquote]:my-6 md:[&_blockquote]:my-8 [&_blockquote]:italic 
+                  [&_blockquote]:text-lg md:[&_blockquote]:text-xl [&_blockquote]:text-foreground/80 [&_blockquote]:leading-relaxed
+                  [&_ul]:my-6 md:[&_ul]:my-8 [&_ul]:space-y-2 [&_ul]:text-base md:[&_ul]:text-lg [&_ul]:pl-5
+                  [&_ol]:my-6 md:[&_ol]:my-8 [&_ol]:space-y-2 [&_ol]:text-base md:[&_ol]:text-lg [&_ol]:pl-5
+                  [&_li]:text-foreground/90 [&_li]:leading-relaxed
+                  [&_hr]:my-10 md:[&_hr]:my-12 [&_hr]:border-border
+                  [&_a]:text-accent [&_a]:no-underline [&_a]:underline-offset-2 hover:[&_a]:underline
+                  [&_br]:block [&_br]:my-3"
                 dangerouslySetInnerHTML={{ __html: article.content }}
               />
 
