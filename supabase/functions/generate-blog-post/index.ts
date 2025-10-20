@@ -18,7 +18,7 @@ async function generateContent(papers: any[]): Promise<any> {
 AUDIENCE & STYLE RULES
 - Reading level: high school (ages 14-18)
 - Use ZERO jargon without an immediate plain-English explanation
-- Prefer everyday language and relatable analogies (label analogies clearly as "Analogy:")
+- Prefer everyday language and relatable analogies (integrate them naturally into the text - NEVER use labels like "Analogy:" or "Think about this:")
 - Short paragraphs (2-4 sentences), active voice, conversational tone
 - First person is allowed where it improves relatability
 - Length target: 600-1,000 words (approximately 5-10 minute read)
@@ -36,22 +36,25 @@ OUTPUT FORMAT
 - Use <p> for paragraphs; <ul>/<ol> for lists; <strong> for key sentences
 - All links must be descriptive (avoid "here"); include alt text for any images referenced
 
-ADDITIONAL FORMATTING & READER EXPERIENCE GUIDELINES
-- Add <p><br></p> between major sections (before each <h2>) to create visual breathing room
-- Add <p><br></p> before and after each <figure>, <blockquote>, and <hr> element
-- Limit consecutive paragraphs to 3–4 before adding a visual break (use <blockquote>, <figure>, or <hr>)
-- Keep paragraphs short (2–4 sentences) and focused on a single idea for scan-ability
-- Use <strong> sparingly for emphasis (no more than 3–4 total per article)
-- Include 1–2 <blockquote> elements as pull quotes to provide cognitive rest and visual pacing
-- Use <hr> no more than 1–3 times to separate major sections without visual clutter
-- Enforce a clear hierarchy: <h2> for main sections, <h3> for subsections; never stack headings without an intervening paragraph
-- Avoid inline styles or colors; assume global site CSS manages typography and spacing
+ADDITIONAL FORMATTING & READER EXPERIENCE GUIDELINES - WHITE SPACE IS CRITICAL
+- Add <br><br> after EVERY 2-3 paragraphs to create generous breathing room between text blocks
+- Add <br><br> before and after every <h2>, <h3>, <figure>, <blockquote>, <hr>, <ul>, and <ol> element
+- Keep paragraphs short (2-4 sentences) and focused on a single idea
+- Use <strong> sparingly for emphasis (no more than 3-4 total per article)
+- BLOCKQUOTE RULES (CRITICAL):
+  * Blockquotes must be pull quotes - compelling or key sentences extracted from YOUR OWN article text
+  * NEVER quote directly from the research paper (no author names, no technical paper language)
+  * A blockquote should highlight an insight you've already written in simpler language
+  * Include 1-2 blockquotes maximum
+- Use <hr> no more than 1-2 times to separate major sections
+- Enforce clear hierarchy: <h2> for main sections, <h3> for subsections; never stack headings without a paragraph between
+- NO inline styles or colors; assume global CSS handles typography
 - All links must be descriptive (e.g., "Read the full study"); avoid "click here"
-- Every image must include meaningful alt text describing the content or purpose
-- Optimize for mobile: no wide tables, no deeply nested lists, no long unbroken URLs
-- Keep lists concise (4–6 items) to preserve white space and prevent visual fatigue
-- Alternate dense and light moments (paragraph clusters → quote/image → paragraph clusters) to maintain smooth reading flow
-- The first screen (title → subtitle → opening paragraph) should feel visually light and inviting; never begin or end with a wall of text
+- Every image must include meaningful alt text
+- Keep lists concise (4-6 items) to preserve white space
+- Alternate dense and light moments (text → quote/image → text) for smooth reading flow
+- NEVER use explicit labels like "Analogy:", "Think about this:", "Key takeaway:" - integrate these naturally into flowing sentences
+- The opening should feel visually light and inviting; avoid walls of text
 
 EXACT STRUCTURE TO FOLLOW (INTERNAL GUIDANCE - DO NOT OUTPUT THESE SECTION LABELS):
 
@@ -74,7 +77,7 @@ EXACT STRUCTURE TO FOLLOW (INTERNAL GUIDANCE - DO NOT OUTPUT THESE SECTION LABEL
       - Set up the problem, gap, or paradox
       - Introduce the study in everyday language
       - Show the status quo
-      - Use one concrete example or metaphor (label as "Analogy:")
+      - Use one concrete example or metaphor integrated naturally (NEVER label it as "Analogy:")
       - Give this section a natural heading, NOT "What's Going On / Why It Matters"
    
    Section B (200-300 words) - INTERNAL PURPOSE: "The Discovery & Journey"
@@ -88,9 +91,9 @@ EXACT STRUCTURE TO FOLLOW (INTERNAL GUIDANCE - DO NOT OUTPUT THESE SECTION LABEL
    
    Section C (150-250 words) - INTERNAL PURPOSE: "What This Means / What's Next"
       - Translate findings into implications/applications for everyday life or society
-      - Include "Limits of this study" (1-3 sentences)
-      - Include "What we still don't know" (1-3 sentences)
-      - Offer a small "Try this / Think about this" takeaway for the reader
+      - Include "Limits of this study" integrated naturally (1-3 sentences, without labeling it)
+      - Include "What we still don't know" integrated naturally (1-3 sentences, without labeling it)
+      - Offer a small practical takeaway for the reader (integrated naturally, NEVER labeled as "Try this" or "Think about this")
       - Give this section a natural heading, NOT "What This Means / What's Next"
 
 5. CONCLUSION + CALL-TO-ACTION (50-100 words)
