@@ -106,13 +106,20 @@ const Home = () => {
               Our Mission
             </h2>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              We believe groundbreaking scientific discoveries shouldn't be locked behind jargon and paywalls. 
-              Our team of science communicators carefully selects high-impact research from leading scientific journals, 
-              then translates complex findings into clear, engaging narratives that anyone can understand.
+              Breakthrough science shouldn't be trapped behind jargon or paywalls. I, Samer Mathkour, a PhD candidate, 
+              use advanced AI to distill top-tier, peer-reviewed research into crisp, compelling reads anyone can understand, 
+              without sacrificing clarity or scientific integrity.
             </p>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              Every article preserves the scientific integrity of the original research while making it 
-              accessible, relevant, and exciting for curious minds everywhere.
+              Every week, I scan leading scientific journals and identify the most impactful recent paper in each major field. 
+              The system weighs journal reputation, scientific significance, and public interest to surface discoveries that matter, 
+              then transforms each study into an engaging, plain-English narrative at a high school reading level, with clear 
+              explanations, key findings, and proper citations to the original research.
+            </p>
+            <p className="text-lg text-muted-foreground leading-relaxed">
+              <strong>Transparency Note:</strong> All article selections and summaries are AI-generated and presented for 
+              informational purposes only. They are not medical or professional advice. Each post links to the original 
+              peer-reviewed paper so readers can explore the full research.
             </p>
           </div>
         </div>
