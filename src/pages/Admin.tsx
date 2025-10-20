@@ -175,6 +175,32 @@ const Admin = () => {
     }
   };
 
+  const handleDeleteAllPendingPapers = async () => {
+    try {
+      const { error } = await supabase
+        .from("selected_papers")
+        .delete()
+        .eq("status", "pending_pdf");
+
+      if (error) throw error;
+
+      toast({
+        title: "All pending papers deleted",
+        description: `Removed ${pendingPapers.length} papers from pending uploads`,
+      });
+
+      await fetchPendingPapers();
+      setSelectedPapers([]);
+    } catch (error) {
+      console.error("Delete error:", error);
+      toast({
+        title: "Delete failed",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleDeletePdf = async (paperId: string, pdfPath: string) => {
     try {
       // Delete the file from storage
@@ -402,10 +428,22 @@ const Admin = () => {
         {pendingPapers.length > 0 && (
           <Card>
             <CardHeader>
-              <CardTitle>Upload PDFs</CardTitle>
-              <CardDescription>
-                {pendingPapers.length} papers waiting for PDF upload
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Upload PDFs</CardTitle>
+                  <CardDescription>
+                    {pendingPapers.length} papers waiting for PDF upload
+                  </CardDescription>
+                </div>
+                <Button
+                  onClick={handleDeleteAllPendingPapers}
+                  variant="destructive"
+                  size="sm"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete All
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               {pendingPapers.map((paper) => (
