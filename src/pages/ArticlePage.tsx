@@ -146,8 +146,8 @@ const ArticlePage = () => {
               <div 
                 className="prose max-w-none
                   [&_h1]:font-serif [&_h1]:font-bold [&_h1]:text-primary
-                  [&_h2]:font-serif [&_h2]:font-bold [&_h2]:text-primary [&_h2]:text-2xl md:[&_h2]:text-3xl [&_h2]:mt-7 md:[&_h2]:mt-8 [&_h2]:mb-3 [&_h2]:leading-snug
-                  [&_h3]:font-serif [&_h3]:font-bold [&_h3]:text-primary [&_h3]:text-xl md:[&_h3]:text-2xl [&_h3]:mt-5 md:[&_h3]:mt-6 [&_h3]:mb-2
+                  [&_h2]:font-serif [&_h2]:font-bold [&_h2]:text-primary [&_h2]:text-2xl md:[&_h2]:text-3xl [&_h2]:mt-6 md:[&_h2]:mt-7 [&_h2]:mb-3 [&_h2]:leading-snug
+                  [&_h3]:font-serif [&_h3]:font-bold [&_h3]:text-primary [&_h3]:text-xl md:[&_h3]:text-2xl [&_h3]:mt-5 md:[&_h3]:mt-6 [&_h3]:mb-1.5
                   [&_p]:text-base md:[&_p]:text-lg [&_p]:text-foreground/90 [&_p]:leading-relaxed [&_p]:mb-3
                   [&_strong]:text-foreground [&_strong]:font-semibold
                   [&_em]:text-foreground/80 [&_em]:italic
