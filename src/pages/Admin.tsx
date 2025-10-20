@@ -160,10 +160,6 @@ const Admin = () => {
     const allErrors: string[] = [];
     
     try {
-      const now = new Date();
-      const weekNumber = Math.ceil(now.getDate() / 7);
-      const year = now.getFullYear();
-
       // Process each subject sequentially
       for (const subjectName of selectedSubjects) {
         try {
@@ -181,8 +177,6 @@ const Admin = () => {
           const { data, error } = await supabase.functions.invoke("select-papers", {
             body: {
               subjectId: subjectData.id,
-              weekNumber,
-              year,
             },
           });
 

@@ -124,8 +124,11 @@ serve(async (req) => {
 
     console.log(`Found ${journalNames.length} journals for ${subject.name}`);
 
-    const startDate = new Date(year, 0, (weekNumber - 1) * 7 + 1);
-    const endDate = new Date(year, 0, weekNumber * 7);
+    // Calculate date range for the last 7 days (most recent week)
+    const endDate = new Date(); // Today
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - 7); // 7 days ago
+    
     const startDateStr = startDate.toISOString().split('T')[0].replace(/-/g, '/');
     const endDateStr = endDate.toISOString().split('T')[0].replace(/-/g, '/');
     
@@ -218,10 +221,17 @@ Abstract: ${a.abstract}
       throw new Error('No papers matched AI selection');
     }
 
+    // Calculate current week number and year for storage
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const startOfYear = new Date(currentYear, 0, 1);
+    const daysSinceStart = Math.floor((now.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24));
+    const currentWeekNumber = Math.ceil((daysSinceStart + startOfYear.getDay() + 1) / 7);
+
     const selectedPapers = aiSelectedArticles.map(article => ({
       subject_id: subjectId,
-      week_number: weekNumber,
-      year,
+      week_number: currentWeekNumber,
+      year: currentYear,
       article_title: article.title,
       authors: article.authors,
       journal_name: article.journal,
