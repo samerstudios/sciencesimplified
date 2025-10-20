@@ -15,143 +15,69 @@ async function generateContent(papers: any[]): Promise<any> {
 
 const prompt = `You are a world-class science communicator writing for The Atlantic, Wired, or Scientific American. Your readers are curious high school students and general readers with NO science background who want to understand cutting-edge research.
 
-═══════════════════════════════════════════════════
-CRITICAL HTML FORMATTING RULES (NON-NEGOTIABLE)
-═══════════════════════════════════════════════════
-
-EVERY PARAGRAPH = ONE <p> TAG. NO EXCEPTIONS.
-
-❌ WRONG - Multiple sentences without paragraph tags:
-Scientists discovered a new mechanism. This is important. It could change treatment.
-
-✅ CORRECT - Each idea gets its own <p> tag:
-<p>Scientists discovered a new mechanism that nobody expected.</p>
-
-<p>This finding is important because it challenges everything we thought we knew about the disease.</p>
-
-<p>It could fundamentally change how doctors approach treatment in the next decade.</p>
-
-SPACING RULE: The CSS will automatically add spacing between <p> tags. You ONLY need to write proper HTML structure.
-
-═══════════════════════════════════════════════════
-EMPHASIS & VISUAL HIERARCHY
-═══════════════════════════════════════════════════
-
-Use <strong> for KEY concepts, findings, and important terms (sparingly - only 3-5 times per section):
-<p>The researchers found that <strong>GZMK-expressing CD8+ T cells</strong> were the culprits driving recurrent inflammation.</p>
-
-Use <em> when first introducing a technical term before explaining it:
-<p>These <em>memory T cells</em> (immune cells that remember past encounters) were behaving strangely.</p>
-
-═══════════════════════════════════════════════════
-PARAGRAPH LENGTH RULES
-═══════════════════════════════════════════════════
-
-MAXIMUM: 3 sentences per paragraph
-IDEAL: 1-2 sentences per paragraph
-Break up complex ideas into bite-sized chunks
-
-❌ WRONG - Dense paragraph:
-<p>Think about a common cold. You get sick, your body fights it off, and eventually, you get better. But for people with diseases like chronic rhinosinusitis (which means a really long-lasting stuffy nose and sinus pain) or asthma, it's not that simple. These conditions are called inflammatory diseases, and they often come back again and again, even after treatments.</p>
-
-✅ CORRECT - Broken into digestible pieces:
-<p>Think about a common cold. You get sick, your body fights it off, and you get better.</p>
-
-<p>But for people with <em>chronic rhinosinusitis</em> (long-lasting stuffy nose and sinus pain) or asthma, it's not that simple. These conditions keep coming back, even after treatment.</p>
-
-<p>Scientists call these <strong>recurrent inflammatory diseases</strong>, and for years, they've been a mystery.</p>
-
-═══════════════════════════════════════════════════
-CONTENT STRUCTURE REQUIREMENTS
-═══════════════════════════════════════════════════
-
-PAPER USAGE (CRITICAL):
-- You have 1 breakthrough paper - explain this ONE discovery
-- No inline citations like "(Author et al., Year)" - full citation at the end only
-- Use ONLY information from the paper provided - no speculation
-
 AUDIENCE:
 - Reading level: high school (ages 14-18)
 - ZERO jargon without immediate plain-English explanation
-- Relatable analogies (label as "Analogy:")
+- Relatable analogies when helpful
 - Conversational, engaging tone (like explaining to a curious friend)
 - Length: 600-1,000 words
 
-═══════════════════════════════════════════════════
-EXACT HTML STRUCTURE TO OUTPUT
-═══════════════════════════════════════════════════
+CONTENT REQUIREMENTS:
+- Use ONLY information from the paper provided - no speculation
+- No inline citations like "(Author et al., Year)" - full citation at the end only
+- Break complex ideas into digestible pieces
+- Keep paragraphs short (2-3 sentences max)
 
-<h2>The Problem / Why Scientists Cared</h2>
+REQUIRED STRUCTURE:
 
-<p>[Hook sentence that sets up the problem]</p>
+INTRODUCTION:
+- Open with a relatable scenario, question, or surprising fact
+- Reveal the research insight in plain English
+- Explain why this discovery matters to the reader
 
-<p>[Expand on why this problem exists]</p>
+SECTION: The Problem / Why Scientists Cared
+- Hook sentence that sets up the problem
+- Explain why this problem exists
+- Use a real-world comparison to make it tangible
+- Explain the stakes - why solving this matters
+- Provide impact statistics or broader context
 
-<p>[Analogy: Real-world comparison that makes it tangible]</p>
+SECTION: The Breakthrough
+- What researchers set out to discover
+- Brief description of their approach in plain English
+- The key finding - the "aha moment"
+- Specific evidence or data that proves it
+- Why this finding is unexpected or important
+- Additional supporting findings if relevant
+- Validation through experiments or models
 
-<p>[Why solving this matters - the stakes]</p>
+SECTION: What This Means for Us
+- Immediate practical implications
+- How this could change treatments/technology/understanding
+- Who benefits from this discovery
+- Timeline for real-world impact
+- Limitations: What questions remain unanswered
+- What's next: Future research directions
 
-<p>[Impact statistics or broader context]</p>
+CONCLUSION:
+- One-sentence recap of the breakthrough and why it matters
+- Forward-looking statement about impact
 
-<h2>The Breakthrough</h2>
+KEY TERMS:
+- List 3-5 technical terms with plain English definitions
 
-<p>[What researchers set out to discover]</p>
-
-<p>[Brief description of their approach in plain English]</p>
-
-<p>[The key finding - the "aha moment"]</p>
-
-<p>[Specific evidence or data that proves it]</p>
-
-<p>[Why this finding is unexpected or important]</p>
-
-<p>[Additional supporting findings if relevant]</p>
-
-<p>[Validation through experiments or models]</p>
-
-<h2>What This Means for Us</h2>
-
-<p>[Immediate practical implications]</p>
-
-<p>[How this could change treatments/technology/understanding]</p>
-
-<p>[Who benefits from this discovery]</p>
-
-<p>[Timeline for real-world impact]</p>
-
-<p><strong>Limitations:</strong> [What questions remain unanswered]</p>
-
-<p><strong>What's next:</strong> [Future research directions]</p>
-
-<h2>Conclusion</h2>
-
-<p>[One-sentence recap of the breakthrough and why it matters]</p>
-
-<p>[Forward-looking statement about impact]</p>
-
-<h2>Key Terms</h2>
-
-<ul>
-<li><strong>Term 1:</strong> Plain English definition</li>
-<li><strong>Term 2:</strong> Plain English definition</li>
-<li><strong>Term 3:</strong> Plain English definition</li>
-</ul>
-
-<h2>Citation</h2>
-
-<p>[Authors]. ([Year]). [Title]. <em>[Journal]</em>. DOI: [doi]</p>
-
-═══════════════════════════════════════════════════
+CITATION:
+- Full citation with authors, year, title, journal, and DOI
 
 Papers:
 ${papersContext}
 
 Return your response as JSON with this structure:
 {
-  "title": "string (micro hook title)",
+  "title": "string (clear, curiosity-driven title - no jargon)",
   "subtitle": "string (1-2 line relatable hook)", 
-  "excerpt": "string (the introduction section)",
-  "content": "string (full HTML starting from Body section through Citations, with proper <h2>, <h3>, <p>, <strong>, <ul>, <a> tags)",
+  "excerpt": "string (the introduction text)",
+  "content": "string (full article content with clear section breaks, no HTML formatting)",
   "reading_time_minutes": integer,
   "word_count": integer,
   "tags": ["science", "<domain>", "explain-like-I'm-15"],
