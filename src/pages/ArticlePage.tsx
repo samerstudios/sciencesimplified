@@ -145,21 +145,21 @@ const ArticlePage = () => {
               {/* Article Content */}
               <div 
                 className="prose max-w-none
-                  prose-headings:font-serif prose-headings:font-bold prose-headings:text-primary
-                  prose-h2:text-[3rem] md:prose-h2:text-[3.75rem] prose-h2:mt-16 prose-h2:mb-4 prose-h2:leading-tight
-                  prose-h3:text-[2rem] md:prose-h3:text-[2.5rem] prose-h3:mt-12 prose-h3:mb-3
-                  prose-p:text-lg prose-p:text-foreground/90 prose-p:leading-relaxed prose-p:mb-4
-                  prose-strong:text-foreground prose-strong:font-semibold
-                  prose-em:text-foreground/80
-                  prose-blockquote:border-l-4 prose-blockquote:border-accent prose-blockquote:pl-6 
-                  prose-blockquote:py-4 prose-blockquote:my-8 prose-blockquote:italic 
-                  prose-blockquote:text-xl prose-blockquote:text-foreground/80
-                  prose-ul:my-8 prose-ul:space-y-2 prose-ul:text-lg
-                  prose-ol:my-8 prose-ol:space-y-2 prose-ol:text-lg
-                  prose-li:text-foreground/90
-                  prose-hr:my-12 prose-hr:border-border
-                  prose-a:text-accent prose-a:no-underline hover:prose-a:underline
-                  [&>br]:block [&>br]:my-4"
+                  [&_h1]:font-serif [&_h1]:font-bold [&_h1]:text-primary
+                  [&_h2]:font-serif [&_h2]:font-bold [&_h2]:text-primary [&_h2]:text-5xl md:[&_h2]:text-6xl [&_h2]:mt-16 [&_h2]:mb-4 [&_h2]:leading-tight
+                  [&_h3]:font-serif [&_h3]:font-bold [&_h3]:text-primary [&_h3]:text-3xl md:[&_h3]:text-4xl [&_h3]:mt-12 [&_h3]:mb-3
+                  [&_p]:text-lg [&_p]:text-foreground/90 [&_p]:leading-relaxed [&_p]:mb-4
+                  [&_strong]:text-foreground [&_strong]:font-semibold
+                  [&_em]:text-foreground/80
+                  [&_blockquote]:border-l-4 [&_blockquote]:border-accent [&_blockquote]:pl-6 
+                  [&_blockquote]:py-4 [&_blockquote]:my-8 [&_blockquote]:italic 
+                  [&_blockquote]:text-xl [&_blockquote]:text-foreground/80
+                  [&_ul]:my-8 [&_ul]:space-y-2 [&_ul]:text-lg
+                  [&_ol]:my-8 [&_ol]:space-y-2 [&_ol]:text-lg
+                  [&_li]:text-foreground/90
+                  [&_hr]:my-12 [&_hr]:border-border
+                  [&_a]:text-accent [&_a]:no-underline hover:[&_a]:underline
+                  [&_br]:block [&_br]:my-4"
                 dangerouslySetInnerHTML={{ __html: article.content }}
               />
 
