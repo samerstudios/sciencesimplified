@@ -18,6 +18,7 @@ const Admin = () => {
   const [pendingPapers, setPendingPapers] = useState<any[]>([]);
   const [readyPapers, setReadyPapers] = useState<any[]>([]);
   const [draftPosts, setDraftPosts] = useState<any[]>([]);
+  const [publishedPosts, setPublishedPosts] = useState<any[]>([]);
   const [publishingPosts, setPublishingPosts] = useState<Set<string>>(new Set());
   const [uploadingPapers, setUploadingPapers] = useState<Set<string>>(new Set());
   const [previewPost, setPreviewPost] = useState<any>(null);
@@ -28,6 +29,7 @@ const Admin = () => {
     fetchSubjects();
     fetchPendingPapers();
     fetchDraftPosts();
+    fetchPublishedPosts();
   }, []);
 
   const fetchSubjects = async () => {
@@ -66,6 +68,16 @@ const Admin = () => {
     if (data) setDraftPosts(data);
   };
 
+  const fetchPublishedPosts = async () => {
+    const { data } = await supabase
+      .from("blog_posts")
+      .select("*")
+      .eq("status", "published")
+      .order("publish_date", { ascending: false });
+    
+    if (data) setPublishedPosts(data);
+  };
+
   const handleClearAllPosts = async () => {
     try {
       const { error } = await supabase
@@ -81,6 +93,7 @@ const Admin = () => {
       });
 
       await fetchDraftPosts();
+      await fetchPublishedPosts();
     } catch (error) {
       console.error("Delete error:", error);
       toast({
@@ -216,6 +229,7 @@ const Admin = () => {
       setReadyPapers([]);
       await fetchPendingPapers();
       await fetchDraftPosts();
+      await fetchPublishedPosts();
     } catch (error) {
       console.error("Error generating blog:", error);
       toast({
@@ -403,6 +417,7 @@ const Admin = () => {
                           });
 
                           await fetchDraftPosts();
+                          await fetchPublishedPosts();
                         } catch (error) {
                           console.error("Delete error:", error);
                           toast({
@@ -438,6 +453,7 @@ const Admin = () => {
                           });
 
                           await fetchDraftPosts();
+                          await fetchPublishedPosts();
                         } catch (error) {
                           console.error("Publish error:", error);
                           toast({
@@ -468,6 +484,104 @@ const Admin = () => {
                           Publish
                         </>
                       )}
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
+
+        {publishedPosts.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Published Posts</CardTitle>
+              <CardDescription>
+                {publishedPosts.length} published blog posts on the site
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {publishedPosts.map((post) => (
+                <div key={post.id} className="p-4 border rounded-lg space-y-3">
+                  <div>
+                    <h3 className="font-semibold">{post.title}</h3>
+                    <p className="text-sm text-muted-foreground">{post.subtitle}</p>
+                    <p className="text-xs text-muted-foreground mt-2">{post.excerpt}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Published: {new Date(post.publish_date).toLocaleDateString()} • {post.read_time} min read
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => setPreviewPost(post)}
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                    >
+                      <Eye className="mr-2 h-4 w-4" />
+                      Preview
+                    </Button>
+                    <Button
+                      onClick={async () => {
+                        try {
+                          const { error } = await supabase
+                            .from("blog_posts")
+                            .update({ status: "draft", publish_date: null })
+                            .eq("id", post.id);
+
+                          if (error) throw error;
+
+                          toast({
+                            title: "Post unpublished",
+                            description: "The post has been moved back to drafts",
+                          });
+
+                          await fetchDraftPosts();
+                          await fetchPublishedPosts();
+                        } catch (error) {
+                          console.error("Unpublish error:", error);
+                          toast({
+                            title: "Unpublish failed",
+                            description: error instanceof Error ? error.message : "Unknown error",
+                            variant: "destructive",
+                          });
+                        }
+                      }}
+                      variant="outline"
+                      size="sm"
+                    >
+                      Unpublish
+                    </Button>
+                    <Button
+                      onClick={async () => {
+                        try {
+                          const { error } = await supabase
+                            .from("blog_posts")
+                            .delete()
+                            .eq("id", post.id);
+
+                          if (error) throw error;
+
+                          toast({
+                            title: "Post deleted",
+                            description: "The blog post has been removed",
+                          });
+
+                          await fetchPublishedPosts();
+                        } catch (error) {
+                          console.error("Delete error:", error);
+                          toast({
+                            title: "Delete failed",
+                            description: error instanceof Error ? error.message : "Unknown error",
+                            variant: "destructive",
+                          });
+                        }
+                      }}
+                      variant="destructive"
+                      size="sm"
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete
                     </Button>
                   </div>
                 </div>
