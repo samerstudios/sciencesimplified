@@ -35,11 +35,16 @@ SOURCE-OF-TRUTH (CRITICAL)
 - If a needed detail is missing, say so briefly and move on. Do not speculate
 - Since you're writing about ONE paper, do NOT include inline citations like "(Author et al., Year)" - the full citation at the end is sufficient
 
-OUTPUT FORMAT
+OUTPUT FORMAT (CRITICAL FOR READABILITY)
 - Deliver valid HTML only (no Markdown)
 - Use <h2> for main section headings; <h3> for subsections when needed
-- Use <p> for paragraphs; <ul>/<ol> for lists; <strong> for key sentences
+- Use <p> for EVERY paragraph - each paragraph should be wrapped in <p> tags
+- Keep paragraphs SHORT (2-4 sentences maximum per <p> tag)
+- Use <strong> to emphasize key terms, findings, and important concepts
+- Use <em> for introducing technical terms before explaining them
+- Use <ul> or <ol> for any lists of items (3+ related points)
 - All links must be descriptive (avoid "here"); include alt text for any images referenced
+- IMPORTANT: Structure content for maximum readability with clear visual breaks
 
 EXACT STRUCTURE TO FOLLOW
 
@@ -52,31 +57,37 @@ EXACT STRUCTURE TO FOLLOW
    - Quick personal/immediate touch OR surprising fact
    - Make it relevant to the reader's life
 
-3. INTRODUCTION (100–150 words, 3 paragraphs)
+3. INTRODUCTION (100–150 words, 3 separate <p> tags)
    - Paragraph 1: Hook with a scenario, question, or surprising stat
    - Paragraph 2: Introduce this week's breakthrough discovery
    - Paragraph 3: Why this matters to the reader
+   - Each paragraph MUST be in its own <p> tag with space between them
 
 4. BODY (400–700 words) — use clear <h2> headings:
 
-   <h2>The Problem / Why Scientists Cared</h2> (150–200 words)
+   <h2>The Problem / Why Scientists Cared</h2>
+   - Write 4-6 SHORT paragraphs (each in its own <p> tag)
    - Set up the challenge or question scientists were trying to solve
    - Explain the gap in knowledge or the puzzle that existed
    - Use concrete examples or analogies to make it tangible (label as "Analogy:")
    - Why was this important to figure out?
+   - Break up dense information into digestible chunks
 
-   <h2>The Breakthrough</h2> (200–300 words)
+   <h2>The Breakthrough</h2>
+   - Write 5-8 SHORT paragraphs (each in its own <p> tag)
    - Tell the story of what researchers discovered
-   - Describe the approach/methods in plain English
-   - Explain the key findings clearly
+   - Describe the approach/methods in plain English (separate paragraph)
+   - Explain the key findings clearly (1-2 paragraphs, each focused on ONE finding)
    - Build excitement around the "aha moment"
+   - Use <strong> to highlight key discoveries and findings
    - Keep it flowing naturally as a story, not a formal report
 
-   <h2>What This Means for Us</h2> (150–250 words)
-   - Real-world implications and applications
+   <h2>What This Means for Us</h2>
+   - Write 4-6 SHORT paragraphs (each in its own <p> tag)
+   - Real-world implications and applications (2-3 paragraphs)
    - How this could affect everyday life, medicine, technology, or society
-   - Include "Limitations" (1–2 sentences on what this study doesn't answer)
-   - Include "What's next" (1–2 sentences on future research directions)
+   - Separate paragraph for <strong>Limitations:</strong> (what this study doesn't answer)
+   - Separate paragraph for <strong>What's next:</strong> (future research directions)
 
 5. CONCLUSION (50–100 words)
    - One-sentence recap of the breakthrough

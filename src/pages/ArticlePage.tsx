@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Clock, Calendar, User, BookOpen, ExternalLink, Loader2 } from "lucide-react";
+import { ArrowLeft, Clock, Calendar, BookOpen, ExternalLink, Loader2 } from "lucide-react";
 import Header from "@/components/Header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -131,20 +131,25 @@ const ArticlePage = () => {
                 </p>
               )}
 
-              {/* Article Info */}
-              <div className="flex flex-wrap gap-6 py-6 mb-8 border-y border-border">
-                <div className="flex items-start gap-2">
-                  <User className="h-5 w-5 text-muted-foreground mt-0.5" />
-                  <div>
-                    <div className="text-sm font-medium text-foreground">{article.author}</div>
-                    <div className="text-xs text-muted-foreground">Author</div>
-                  </div>
+              {/* Excerpt */}
+              {article.excerpt && (
+                <div className="text-lg leading-relaxed text-foreground/90 mb-12 pb-8 border-b border-border">
+                  {article.excerpt}
                 </div>
-              </div>
+              )}
 
               {/* Article Content */}
               <div 
-                className="prose prose-lg max-w-none"
+                className="prose prose-lg md:prose-xl max-w-none
+                  prose-headings:font-serif prose-headings:font-bold prose-headings:text-primary
+                  prose-h2:text-3xl prose-h2:mt-16 prose-h2:mb-6 prose-h2:leading-tight
+                  prose-h3:text-2xl prose-h3:mt-12 prose-h3:mb-4
+                  prose-p:text-foreground/90 prose-p:leading-relaxed prose-p:mb-6
+                  prose-strong:text-foreground prose-strong:font-semibold
+                  prose-em:text-foreground/80
+                  prose-ul:my-6 prose-ul:space-y-2
+                  prose-li:text-foreground/90
+                  prose-a:text-accent prose-a:no-underline hover:prose-a:underline"
                 dangerouslySetInnerHTML={{ __html: article.content }}
               />
 
