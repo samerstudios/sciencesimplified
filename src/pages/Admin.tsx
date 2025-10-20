@@ -399,27 +399,37 @@ const Admin = () => {
               </div>
             </div>
 
-            <Select 
-              value="" 
-              onValueChange={(value) => {
-                if (value && !selectedSubjects.includes(value)) {
-                  setSelectedSubjects(prev => [...prev, value]);
-                }
-              }}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Add a subject" />
-              </SelectTrigger>
-              <SelectContent className="bg-background z-50">
-                {subjects
-                  .filter(subject => !selectedSubjects.includes(subject.name))
-                  .map((subject) => (
-                    <SelectItem key={subject.id} value={subject.name}>
-                      {subject.name}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
+            <div className="flex gap-2">
+              <Select 
+                value="" 
+                onValueChange={(value) => {
+                  if (value && !selectedSubjects.includes(value)) {
+                    setSelectedSubjects(prev => [...prev, value]);
+                  }
+                }}
+              >
+                <SelectTrigger className="flex-1">
+                  <SelectValue placeholder="Add a subject" />
+                </SelectTrigger>
+                <SelectContent className="bg-background z-50">
+                  {subjects
+                    .filter(subject => !selectedSubjects.includes(subject.name))
+                    .map((subject) => (
+                      <SelectItem key={subject.id} value={subject.name}>
+                        {subject.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+
+              <Button
+                onClick={() => setSelectedSubjects(subjects.map(s => s.name))}
+                disabled={selectedSubjects.length === subjects.length}
+                variant="outline"
+              >
+                Add All
+              </Button>
+            </div>
 
             <Button
               onClick={handleSelectPapers}
