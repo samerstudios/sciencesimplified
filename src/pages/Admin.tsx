@@ -14,6 +14,7 @@ const Admin = () => {
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const [isSelecting, setIsSelecting] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isBatchSelecting, setIsBatchSelecting] = useState(false);
   const [selectedPapers, setSelectedPapers] = useState<string[]>([]);
   const [pendingPapers, setPendingPapers] = useState<any[]>([]);
   const [readyPapers, setReadyPapers] = useState<any[]>([]);
@@ -256,6 +257,31 @@ const Admin = () => {
     }
   };
 
+  const handleBatchSelectPapers = async () => {
+    setIsBatchSelecting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("batch-select-papers");
+
+      if (error) throw error;
+
+      toast({
+        title: "Batch selection complete!",
+        description: data.message,
+      });
+
+      await fetchPendingPapers();
+    } catch (error) {
+      console.error("Error in batch selection:", error);
+      toast({
+        title: "Batch selection failed",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive",
+      });
+    } finally {
+      setIsBatchSelecting(false);
+    }
+  };
+
   const handleSelectPapers = async () => {
     if (selectedSubjects.length === 0) {
       toast({ title: "Please select at least one subject", variant: "destructive" });
@@ -414,6 +440,26 @@ const Admin = () => {
             Manage paper selection and blog post generation
           </p>
         </div>
+
+        <Card className="border-primary/50">
+          <CardHeader>
+            <CardTitle>Batch Process Last 6 Weeks</CardTitle>
+            <CardDescription>
+              Automatically select papers from the last 6 Sundays for all subjects. This will run the paper selection pipeline for each week and subject, then you can manually upload PDFs.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button
+              onClick={handleBatchSelectPapers}
+              disabled={isBatchSelecting}
+              className="w-full"
+              size="lg"
+            >
+              {isBatchSelecting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isBatchSelecting ? "Processing... (this may take several minutes)" : "Select Papers from Last 6 Weeks"}
+            </Button>
+          </CardContent>
+        </Card>
 
         <Card>
           <CardHeader>
