@@ -85,13 +85,13 @@ function parsePubMedXML(xml: string): PubMedArticle[] {
   return articles;
 }
 
-function getWeekDateRange(weeksAgo: number): { startDate: string; endDate: string; weekNumber: number; year: number } {
+function getWeekDateRange(weeksAgo: number): { startDate: string; endDate: string; weekNumber: number; year: number; sundayDate: string } {
   const now = new Date();
   const currentDay = now.getDay();
   const daysToLastSunday = currentDay === 0 ? 0 : currentDay;
   const lastSunday = new Date(now);
   lastSunday.setDate(now.getDate() - daysToLastSunday - (weeksAgo * 7));
-  lastSunday.setHours(0, 0, 0, 0);
+  lastSunday.setHours(12, 0, 0, 0); // Set to noon to avoid timezone issues
   
   const weekStart = new Date(lastSunday);
   weekStart.setDate(lastSunday.getDate() - 6);
@@ -109,7 +109,8 @@ function getWeekDateRange(weeksAgo: number): { startDate: string; endDate: strin
     startDate: formatDate(weekStart),
     endDate: formatDate(lastSunday),
     weekNumber,
-    year: lastSunday.getFullYear()
+    year: lastSunday.getFullYear(),
+    sundayDate: lastSunday.toISOString()
   };
 }
 
@@ -141,7 +142,7 @@ Deno.serve(async (req) => {
 
     // Process each week
     for (let weeksAgo = 1; weeksAgo <= 6; weeksAgo++) {
-      const { startDate, endDate, weekNumber, year } = getWeekDateRange(weeksAgo);
+      const { startDate, endDate, weekNumber, year, sundayDate } = getWeekDateRange(weeksAgo);
       console.log(`Processing week ${weeksAgo}: ${startDate} to ${endDate} (Week ${weekNumber}, ${year})`);
 
       // Process each subject for this week
@@ -224,7 +225,7 @@ The selectedIndex should be the number (1-based) of the chosen article.`
 
           console.log(`Selected article: ${selectedArticle.title}`);
 
-          // Store the selected paper
+          // Store the selected paper with the Sunday date
           const { error: insertError } = await supabase
             .from('selected_papers')
             .insert({
@@ -236,6 +237,7 @@ The selectedIndex should be the number (1-based) of the chosen article.`
               doi: selectedArticle.doi,
               pubmed_id: selectedArticle.pubmedId,
               publication_date: selectedArticle.pubDate ? `${selectedArticle.pubDate}-01-01` : null,
+              selection_date: sundayDate,
               week_number: weekNumber,
               year: year,
               status: 'pending_pdf',
