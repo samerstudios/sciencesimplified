@@ -13,70 +13,81 @@ async function generateContent(papers: any[]): Promise<any> {
     `Paper ${i + 1}: "${p.article_title}"\nAuthors: ${p.authors}\nJournal: ${p.journal_name}\nDOI: ${p.doi}\nAbstract: ${p.abstract}\n`
   ).join('\n---\n');
 
-  const prompt = `You are a science communicator writing for high school students and general readers with NO science background. Create an ENGAGING STORY-DRIVEN blog post following this exact structure:
+  const prompt = `You are a science communicator writing for high school students and general readers with NO science background. Produce an ENGAGING, STORY-DRIVEN science blog post strictly based on the provided Papers.
 
-CRITICAL WRITING RULES:
-- Write at a high school reading level (ages 14-18)
-- Use ZERO scientific jargon without explanation
-- Replace technical terms with everyday language and relatable analogies
-- Use short paragraphs (2-4 sentences each)
-- Active voice and conversational tone
-- Use first person where appropriate for relatability
+AUDIENCE & STYLE RULES
+- Reading level: high school (ages 14–18)
+- Use ZERO jargon without an immediate plain-English explanation
+- Prefer everyday language and relatable analogies (label analogies clearly as "Analogy:")
+- Short paragraphs (2–4 sentences), active voice, conversational tone
+- First person is allowed where it improves relatability
+- Length target: 600–1,000 words (≈5–10 minute read)
 
-EXACT STRUCTURE TO FOLLOW:
+SOURCE-OF-TRUTH
+- Use ONLY information contained in the papers below
+- Do NOT invent facts or numbers
+- If a needed detail is missing, say so briefly and move on
+- Attribute specific claims to the relevant paper(s) with inline hyperlinks
+
+OUTPUT FORMAT
+- Deliver valid HTML only (no Markdown)
+- Use <h2> for main section headings that YOU CREATE (do NOT use the internal structure labels below)
+- Use <h3> for subsections when needed
+- Use <p> for paragraphs; <ul>/<ol> for lists; <strong> for key sentences
+- All links must be descriptive (avoid "here"); include alt text for any images referenced
+
+EXACT STRUCTURE TO FOLLOW (INTERNAL GUIDANCE - DO NOT OUTPUT THESE SECTION LABELS):
 
 1. TITLE (Micro Hook)
    - Clear, benefit-oriented or curiosity-driven
-   - Grab attention immediately
-   - NO jargon
-   - Signal relevance and spark curiosity
+   - Grab attention immediately; no jargon
 
-2. SUBTITLE (1-2 line Relatable Hook)
+2. SUBTITLE (1–2 line Relatable Hook)
    - Quick personal/immediate touch OR surprising fact
-   - Make it feel relevant to the reader's life
+   - Make it relevant to the reader's life
 
-3. INTRODUCTION (100-150 words, 3 paragraphs)
-   Paragraph 1: Hook with a scenario, question, anecdote or surprising stat the reader can feel
+3. INTRODUCTION (100–150 words, 3 paragraphs)
+   Paragraph 1: Scenario, question, anecdote, or surprising stat the reader can feel
    Paragraph 2: Briefly reveal the research/insight you'll discuss
-   Paragraph 3: What the reader will get — why it's worth their time
+   Paragraph 3: What the reader will get—why it's worth their time
 
-4. BODY (400-700 words) — Use clear <h2> headings for each subsection:
+4. BODY (400–700 words) — Create natural <h2> headings that fit the story:
    
-   A. "What's Going On / Why It Matters" (150-200 words)
+   Section A (150–200 words) - INTERNAL PURPOSE: "What's Going On / Why It Matters"
       - Set up the problem, gap, or paradox
       - Introduce the study in everyday language
       - Show the status quo
-      - Use examples/metaphors to make it concrete
+      - Use one concrete example or metaphor (label as "Analogy:")
+      - Give this section a natural heading, NOT "What's Going On / Why It Matters"
    
-   B. "The Discovery & Journey" (200-300 words)
-      - Make the science feel like a story using "And, But, Therefore":
-        * AND: Start with established fact/context
-        * BUT: Introduce the surprise or problem
-        * THEREFORE: Shift to the outcome/insight
-      - Show how researchers found the result
+   Section B (200–300 words) - INTERNAL PURPOSE: "The Discovery & Journey"
+      - Tell the story using "And, But, Therefore":
+        * AND: Established fact/context
+        * BUT: The surprise or problem
+        * THEREFORE: The outcome/insight
+      - Briefly describe how researchers found the result (methods in plain English)
+      - Give this section a natural heading, NOT "The Discovery & Journey"
    
-   C. "What This Means / What's Next" (150-250 words)
-      - Translate findings into implications and applications
-      - Make it relevant to the reader's world
-      - Discuss remaining questions or limitations
-      - Offer a "what you can do/think about" angle
+   Section C (150–250 words) - INTERNAL PURPOSE: "What This Means / What's Next"
+      - Translate findings into implications/applications for everyday life or society
+      - Include "Limits of this study" (1–3 sentences)
+      - Include "What we still don't know" (1–3 sentences)
+      - Offer a small "Try this / Think about this" takeaway for the reader
+      - Give this section a natural heading, NOT "What This Means / What's Next"
 
-5. CONCLUSION + CALL-TO-ACTION (50-100 words)
-   - One-sentence recap of main insight
+5. CONCLUSION + CALL-TO-ACTION (50–100 words)
+   - One-sentence recap of the main insight
    - Why it matters for the reader
-   - Simple invitation: comment, explore further, etc.
+   - Simple invitation: comment, share, read the paper, or explore further
 
-6. CITATIONS
-   - End with proper citations of the papers referenced
+6. KEY TERMS (Plain English mini-glossary)
+   - Provide 3–6 brief definitions for any unavoidable technical terms
+   - Format as a simple list with <h3>Key Terms</h3>
 
-FORMATTING:
-- Use <h2> for main section headings
-- Use <h3> for subsection headings if needed
-- Keep paragraphs short (2-4 sentences)
-- Use <ul> or <ol> for lists when introducing multiple points
-- Bold key sentences with <strong>
-- Use <p> tags for paragraphs
-- Include <a> hyperlinks to reference papers naturally in text
+7. CITATIONS
+   - Inline: hyperlink author/year or paper title at the specific claims
+   - End section: list all referenced papers with author(s), year, title, journal (if given), and DOI/URL
+   - Format with <h3>References</h3>
 
 Papers:
 ${papersContext}
@@ -86,7 +97,9 @@ Return your response as JSON with this structure:
   "title": "string (micro hook title)",
   "subtitle": "string (1-2 line relatable hook)", 
   "excerpt": "string (the introduction section)",
-  "content": "string (full HTML starting from Body section through Citations, with proper <h2>, <h3>, <p>, <strong>, <ul>, <a> tags)"
+  "content": "string (full HTML starting from Body section through Citations, with proper <h2>, <h3>, <p>, <strong>, <ul>, <a> tags)",
+  "reading_time_minutes": integer,
+  "word_count": integer
 }`;
 
   const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
