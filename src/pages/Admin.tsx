@@ -105,6 +105,17 @@ const Admin = () => {
   };
 
   const handleFileUpload = async (paperId: string, file: File) => {
+    // Check file size (50MB limit for storage)
+    const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB in bytes
+    if (file.size > MAX_FILE_SIZE) {
+      toast({
+        title: "File too large",
+        description: `PDF size (${(file.size / 1024 / 1024).toFixed(1)}MB) exceeds the 50MB limit. Please use a smaller file.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
     setUploadingPapers(prev => new Set(prev).add(paperId));
     
     try {
