@@ -157,7 +157,7 @@ const Home = () => {
       <footer className="py-12 border-t border-border">
         <div className="container mx-auto px-6 lg:px-12">
           <div className="text-center text-sm text-muted-foreground">
-            <p>© 2024 ScienceSimplified. Making research accessible to everyone.</p>
+            <p>© 2025 ScienceSimplified. Making research accessible to everyone.</p>
           </div>
         </div>
       </footer>
