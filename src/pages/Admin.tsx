@@ -390,21 +390,36 @@ const Admin = () => {
 
       if (error) throw error;
 
-      toast({
-        title: "Blog post generated!",
-        description: "Check the Draft Posts section below to review and publish",
-      });
+      // Show appropriate message based on response
+      const responseData = data as any;
+      if (responseData?.success) {
+        toast({
+          title: responseData.count > 0 ? "Blog posts generated!" : "No new posts created",
+          description: responseData.message || "Check the Draft Posts section below to review and publish",
+        });
 
-      setSelectedPapers([]);
-      setReadyPapers([]);
-      await fetchPendingPapers();
-      await fetchDraftPosts();
-      await fetchPublishedPosts();
+        // Refresh data
+        await fetchPendingPapers();
+        await fetchDraftPosts();
+        await fetchPublishedPosts();
+
+        // If there are remaining papers, inform the user
+        if (responseData.remainingPapers > 0) {
+          setTimeout(() => {
+            toast({
+              title: "More papers to process",
+              description: `${responseData.remainingPapers} papers remaining. Click "Generate blog post with AI" again to continue.`,
+            });
+          }, 2000);
+        }
+      } else {
+        throw new Error(responseData?.message || "Failed to generate blog posts");
+      }
     } catch (error) {
       console.error("Error generating blog:", error);
       toast({
         title: "Error generating blog",
-        description: error instanceof Error ? error.message : "Unknown error",
+        description: error instanceof Error ? error.message : "Failed to send request to edge function",
         variant: "destructive",
       });
     } finally {

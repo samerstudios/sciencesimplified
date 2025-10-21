@@ -197,12 +197,17 @@ serve(async (req) => {
       throw new Error('No paper IDs provided');
     }
 
-    console.log(`Generating blog posts for ${paperIds.length} papers`);
+    // CRITICAL: Limit batch size to prevent timeout (edge functions have ~2 min limit)
+    const MAX_BATCH_SIZE = 10;
+    const tooManyPapers = paperIds.length > MAX_BATCH_SIZE;
+    const limitedPaperIds = tooManyPapers ? paperIds.slice(0, MAX_BATCH_SIZE) : paperIds;
+
+    console.log(`Generating blog posts for ${limitedPaperIds.length} papers${tooManyPapers ? ` (limited from ${paperIds.length})` : ''}`);
 
     const { data: papers, error: papersError } = await supabase
       .from('selected_papers')
       .select('*')
-      .in('id', paperIds);
+      .in('id', limitedPaperIds);
 
     if (papersError) throw papersError;
     if (!papers || papers.length === 0) throw new Error('Papers not found');
@@ -211,7 +216,7 @@ serve(async (req) => {
     const { data: existingCitations, error: citationsError } = await supabase
       .from('paper_citations')
       .select('selected_paper_id')
-      .in('selected_paper_id', paperIds);
+      .in('selected_paper_id', limitedPaperIds);
 
     if (citationsError) {
       console.error('Error checking existing citations:', citationsError);
@@ -224,7 +229,13 @@ serve(async (req) => {
     
     if (papersToGenerate.length === 0) {
       return new Response(
-        JSON.stringify({ success: true, message: 'All selected papers already have blog posts', blogPosts: [], count: 0 }),
+        JSON.stringify({ 
+          success: true, 
+          message: 'All selected papers already have blog posts', 
+          blogPosts: [], 
+          count: 0,
+          remainingPapers: tooManyPapers ? paperIds.length - MAX_BATCH_SIZE : 0
+        }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -232,9 +243,17 @@ serve(async (req) => {
     console.log(`Generating blog posts for ${papersToGenerate.length} new papers (skipping ${existingPaperIds.size} existing)`);
 
     const createdPosts = [];
+    const errors = [];
+    const startTime = Date.now();
+    const TIMEOUT_MS = 100000; // 100 seconds timeout (leaving buffer before 120s edge function limit)
 
     // Generate a separate blog post for each paper
     for (const paper of papersToGenerate) {
+      // Check if we're approaching timeout
+      if (Date.now() - startTime > TIMEOUT_MS) {
+        console.log(`Timeout approaching after ${createdPosts.length} posts. Returning partial results.`);
+        break;
+      }
       try {
         console.log(`Generating blog post for paper: ${paper.id}`);
         
@@ -284,21 +303,41 @@ serve(async (req) => {
         });
 
         createdPosts.push(blogPost);
-        console.log(`Successfully generated blog post: ${blogPost.id}`);
+        console.log(`Successfully generated blog post: ${blogPost.id} (${createdPosts.length}/${papersToGenerate.length})`);
       } catch (error) {
-        console.error(`Failed to generate blog post for paper ${paper.id}:`, error);
+        const errorMsg = error instanceof Error ? error.message : 'Unknown error';
+        console.error(`Failed to generate blog post for paper ${paper.id}:`, errorMsg);
+        errors.push({ paperId: paper.id, error: errorMsg });
         // Continue with next paper instead of failing completely
       }
     }
 
+    const remainingInQueue = tooManyPapers ? paperIds.length - MAX_BATCH_SIZE : 0;
+    const message = createdPosts.length > 0 
+      ? `Successfully generated ${createdPosts.length} blog post${createdPosts.length > 1 ? 's' : ''}${errors.length > 0 ? ` (${errors.length} failed)` : ''}${remainingInQueue > 0 ? `. ${remainingInQueue} papers remaining - run again to continue.` : ''}`
+      : `Failed to generate any blog posts. ${errors.length} error(s) occurred.`;
+
     return new Response(
-      JSON.stringify({ success: true, blogPosts: createdPosts, count: createdPosts.length }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ 
+        success: createdPosts.length > 0, 
+        blogPosts: createdPosts, 
+        count: createdPosts.length,
+        errors: errors,
+        remainingPapers: remainingInQueue,
+        message: message
+      }),
+      { 
+        status: createdPosts.length > 0 ? 200 : 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
     );
   } catch (error) {
     console.error('Error in generate-blog-post function:', error);
     return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : 'Unknown error' }),
+      JSON.stringify({ 
+        error: error instanceof Error ? error.message : 'Unknown error',
+        success: false
+      }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
