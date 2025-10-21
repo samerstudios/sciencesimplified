@@ -55,8 +55,19 @@ const Admin = () => {
       .eq("status", "pdf_uploaded")
       .order("selection_date", { ascending: false });
     
+    // Filter out papers that already have blog posts
+    if (ready) {
+      const { data: existingCitations } = await supabase
+        .from("paper_citations")
+        .select("selected_paper_id")
+        .in("selected_paper_id", ready.map(p => p.id));
+      
+      const existingPaperIds = new Set(existingCitations?.map(c => c.selected_paper_id) || []);
+      const filteredReady = ready.filter(paper => !existingPaperIds.has(paper.id));
+      setReadyPapers(filteredReady);
+    }
+    
     if (pending) setPendingPapers(pending);
-    if (ready) setReadyPapers(ready);
   };
 
   const fetchDraftPosts = async () => {
