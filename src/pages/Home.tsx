@@ -37,7 +37,7 @@ const Home = () => {
     cards?.forEach((card) => observer.observe(card));
 
     return () => observer.disconnect();
-  }, [articles, selectedCategory]);
+  }, [articles, selectedCategory, currentPage]);
 
   useEffect(() => {
     const fetchData = async () => {
