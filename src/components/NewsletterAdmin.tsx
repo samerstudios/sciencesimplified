@@ -86,12 +86,16 @@ export const NewsletterAdmin = () => {
         <div className="space-y-4">
           <div>
             <h3 className="font-semibold mb-3">Send Test Newsletter</h3>
+            <p className="text-sm text-muted-foreground mb-3">
+              ⚠️ With Resend's free tier, you can only send to your registered email (samerstudios98@gmail.com). 
+              To send to other addresses, verify your domain at <a href="https://resend.com/domains" target="_blank" rel="noopener noreferrer" className="text-primary underline">resend.com/domains</a>.
+            </p>
             <div className="space-y-2">
               <Label htmlFor="testEmail">Test Email Address</Label>
               <Input
                 id="testEmail"
                 type="email"
-                placeholder="your@email.com"
+                placeholder="samerstudios98@gmail.com"
                 value={testEmail}
                 onChange={(e) => setTestEmail(e.target.value)}
               />

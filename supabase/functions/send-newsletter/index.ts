@@ -152,6 +152,9 @@ const handler = async (req: Request): Promise<Response> => {
       const batch = recipients.slice(i, i + batchSize);
       
       try {
+        // NOTE: For production, replace with your verified domain email
+        // Example: "ScienceSimplified <newsletter@sciencesimplified.net>"
+        // Verify domain at: https://resend.com/domains
         const { error: emailError } = await resend.emails.send({
           from: "ScienceSimplified <onboarding@resend.dev>",
           to: batch,
