@@ -25,24 +25,33 @@ serve(async (req) => {
 
     console.log(`Publishing blog post: ${blogPostId}`);
 
-    // Get the blog post with its associated paper to get the selection date
-    const { data: postData, error: fetchError } = await supabase
-      .from('blog_posts')
-      .select(`
-        *,
-        paper_citations (
-          selected_papers (
-            selection_date
-          )
-        )
-      `)
-      .eq('id', blogPostId)
+    // Get the paper's selection date via paper_citations
+    const { data: citationData, error: citationError } = await supabase
+      .from('paper_citations')
+      .select('selected_paper_id')
+      .eq('blog_post_id', blogPostId)
+      .limit(1)
       .single();
 
-    if (fetchError) throw fetchError;
+    if (citationError) {
+      console.error('Error fetching paper citation:', citationError);
+      throw citationError;
+    }
 
-    // Use the paper's selection date as the publish date
-    const publishDate = postData?.paper_citations?.[0]?.selected_papers?.selection_date || new Date().toISOString();
+    // Get the selection date from the selected paper
+    const { data: paperData, error: paperError } = await supabase
+      .from('selected_papers')
+      .select('selection_date')
+      .eq('id', citationData.selected_paper_id)
+      .single();
+
+    if (paperError) {
+      console.error('Error fetching paper selection date:', paperError);
+      throw paperError;
+    }
+
+    const publishDate = paperData?.selection_date || new Date().toISOString();
+    console.log(`Using publish date: ${publishDate} for blog post ${blogPostId}`);
 
     const { data: blogPost, error } = await supabase
       .from('blog_posts')
