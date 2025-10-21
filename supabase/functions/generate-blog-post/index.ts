@@ -198,7 +198,8 @@ serve(async (req) => {
     }
 
     // CRITICAL: Limit batch size to prevent timeout (edge functions have ~2 min limit)
-    const MAX_BATCH_SIZE = 10;
+    // Reduced to 5 to stay well under browser fetch timeout limits (~60-90 seconds)
+    const MAX_BATCH_SIZE = 5;
     const tooManyPapers = paperIds.length > MAX_BATCH_SIZE;
     const limitedPaperIds = tooManyPapers ? paperIds.slice(0, MAX_BATCH_SIZE) : paperIds;
 
