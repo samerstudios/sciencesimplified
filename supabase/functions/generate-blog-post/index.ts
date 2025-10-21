@@ -276,6 +276,10 @@ serve(async (req) => {
 
         const heroImage = subjectImageMap[paper.subject_id] || '/quantum.jpg';
 
+        // Use the paper's selection_date as the publish_date (even for drafts)
+        // This ensures historical posts have the correct date from the start
+        const publishDate = paper.selection_date || new Date().toISOString();
+
         const { data: blogPost, error: blogError } = await supabase
           .from('blog_posts')
           .insert({
@@ -287,7 +291,8 @@ serve(async (req) => {
             read_time: readTime,
             paper_ids: [paper.id],
             hero_image_url: heroImage,
-            status: 'draft'
+            status: 'draft',
+            publish_date: publishDate
           })
           .select()
           .single();

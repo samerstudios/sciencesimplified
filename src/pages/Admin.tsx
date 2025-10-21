@@ -734,7 +734,7 @@ const Admin = () => {
                     <p className="text-sm text-muted-foreground">{post.subtitle}</p>
                     <p className="text-xs text-muted-foreground mt-2">{post.excerpt}</p>
                     <p className="text-xs text-muted-foreground mt-1">
-                      Created: {new Date(post.created_at).toLocaleDateString()} • {post.read_time} min read
+                      Date: {post.publish_date ? new Date(post.publish_date).toLocaleDateString() : new Date(post.created_at).toLocaleDateString()} • {post.read_time} min read
                     </p>
                   </div>
                   <div className="flex gap-2">
