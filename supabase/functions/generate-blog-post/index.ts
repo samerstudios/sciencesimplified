@@ -207,10 +207,34 @@ serve(async (req) => {
     if (papersError) throw papersError;
     if (!papers || papers.length === 0) throw new Error('Papers not found');
 
+    // Check which papers already have blog posts
+    const { data: existingCitations, error: citationsError } = await supabase
+      .from('paper_citations')
+      .select('selected_paper_id')
+      .in('selected_paper_id', paperIds);
+
+    if (citationsError) {
+      console.error('Error checking existing citations:', citationsError);
+    }
+
+    const existingPaperIds = new Set(existingCitations?.map(c => c.selected_paper_id) || []);
+    
+    // Filter out papers that already have blog posts
+    const papersToGenerate = papers.filter(paper => !existingPaperIds.has(paper.id));
+    
+    if (papersToGenerate.length === 0) {
+      return new Response(
+        JSON.stringify({ success: true, message: 'All selected papers already have blog posts', blogPosts: [], count: 0 }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    console.log(`Generating blog posts for ${papersToGenerate.length} new papers (skipping ${existingPaperIds.size} existing)`);
+
     const createdPosts = [];
 
     // Generate a separate blog post for each paper
-    for (const paper of papers) {
+    for (const paper of papersToGenerate) {
       try {
         console.log(`Generating blog post for paper: ${paper.id}`);
         
