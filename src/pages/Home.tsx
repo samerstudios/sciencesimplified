@@ -4,6 +4,7 @@ import Hero from "@/components/Hero";
 import CategoryFilter from "@/components/CategoryFilter";
 import ArticleCard from "@/components/ArticleCard";
 import SkeletonCard from "@/components/SkeletonCard";
+import { NewsletterSignup } from "@/components/NewsletterSignup";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 
@@ -229,6 +230,12 @@ const Home = () => {
               )}
             </>
           )}
+        </div>
+      </section>
+
+      <section id="newsletter" className="py-16 md:py-24 bg-gradient-to-br from-primary/10 via-secondary/20 to-accent/10 animate-fade-in">
+        <div className="container mx-auto px-6 lg:px-12">
+          <NewsletterSignup />
         </div>
       </section>
 

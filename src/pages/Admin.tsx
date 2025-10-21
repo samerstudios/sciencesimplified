@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { NewsletterAdmin } from "@/components/NewsletterAdmin";
 
 const Admin = () => {
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
@@ -696,6 +697,8 @@ const Admin = () => {
             </CardContent>
           </Card>
         )}
+
+        <NewsletterAdmin />
 
         {draftPosts.length > 0 && (
           <Card>
