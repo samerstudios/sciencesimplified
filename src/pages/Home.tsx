@@ -12,6 +12,8 @@ const Home = () => {
   const [articles, setArticles] = useState<any[]>([]);
   const [categories, setCategories] = useState<string[]>(["All"]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(12);
   const articlesRef = useRef<HTMLDivElement>(null);
 
   // Intersection Observer for scroll animations
@@ -87,6 +89,28 @@ const Home = () => {
     article => selectedCategory === "All" || article.category === selectedCategory
   );
 
+  // Reset to page 1 when category changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedCategory]);
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredArticles.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedArticles = filteredArticles.slice(startIndex, endIndex);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    // Scroll to articles section
+    document.getElementById('articles')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const handleItemsPerPageChange = (value: string) => {
+    setItemsPerPage(Number(value));
+    setCurrentPage(1); // Reset to first page when changing items per page
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -94,11 +118,33 @@ const Home = () => {
       
       <section id="articles" className="py-16 md:py-24">
         <div className="container mx-auto px-6 lg:px-12">
-          <CategoryFilter 
-            categories={categories}
-            selectedCategory={selectedCategory}
-            onSelectCategory={setSelectedCategory}
-          />
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <CategoryFilter 
+              categories={categories}
+              selectedCategory={selectedCategory}
+              onSelectCategory={setSelectedCategory}
+            />
+            
+            {!loading && filteredArticles.length > 0 && (
+              <div className="flex items-center gap-2">
+                <label htmlFor="itemsPerPage" className="text-sm text-muted-foreground whitespace-nowrap">
+                  Articles per page:
+                </label>
+                <select
+                  id="itemsPerPage"
+                  value={itemsPerPage}
+                  onChange={(e) => handleItemsPerPageChange(e.target.value)}
+                  className="px-3 py-1.5 rounded-md border border-border bg-background text-sm"
+                >
+                  <option value="6">6</option>
+                  <option value="9">9</option>
+                  <option value="12">12</option>
+                  <option value="18">18</option>
+                  <option value="24">24</option>
+                </select>
+              </div>
+            )}
+          </div>
           
           {loading ? (
             <div ref={articlesRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -109,7 +155,7 @@ const Home = () => {
           ) : (
             <>
               <div ref={articlesRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {filteredArticles.map((article) => (
+                {paginatedArticles.map((article) => (
                   <div key={article.id} className="article-card opacity-0">
                     <ArticleCard article={article} />
                   </div>
@@ -121,6 +167,64 @@ const Home = () => {
                   <p className="text-muted-foreground text-lg">
                     No articles found. Check back soon!
                   </p>
+                </div>
+              )}
+
+              {/* Pagination Controls */}
+              {filteredArticles.length > 0 && totalPages > 1 && (
+                <div className="mt-12 flex flex-col sm:flex-row items-center justify-between gap-4">
+                  <div className="text-sm text-muted-foreground">
+                    Showing {startIndex + 1} to {Math.min(endIndex, filteredArticles.length)} of {filteredArticles.length} articles
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="px-4 py-2 rounded-md border border-border bg-background hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Previous
+                    </button>
+                    
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                        // Show first page, last page, current page, and pages around current
+                        if (
+                          page === 1 ||
+                          page === totalPages ||
+                          (page >= currentPage - 1 && page <= currentPage + 1)
+                        ) {
+                          return (
+                            <button
+                              key={page}
+                              onClick={() => handlePageChange(page)}
+                              className={`px-3 py-2 rounded-md border transition-colors ${
+                                currentPage === page
+                                  ? 'bg-primary text-primary-foreground border-primary'
+                                  : 'border-border bg-background hover:bg-accent'
+                              }`}
+                            >
+                              {page}
+                            </button>
+                          );
+                        } else if (
+                          page === currentPage - 2 ||
+                          page === currentPage + 2
+                        ) {
+                          return <span key={page} className="px-2">...</span>;
+                        }
+                        return null;
+                      })}
+                    </div>
+                    
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className="px-4 py-2 rounded-md border border-border bg-background hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Next
+                    </button>
+                  </div>
                 </div>
               )}
             </>
