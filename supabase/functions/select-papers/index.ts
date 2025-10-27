@@ -221,6 +221,31 @@ Abstract: ${a.abstract}
       throw new Error('No papers matched AI selection');
     }
 
+    // Check if any of these papers already exist in the database
+    const existingPapersPmids = aiSelectedArticles.map(a => a.pmid).filter(Boolean);
+    const existingPapersDois = aiSelectedArticles.map(a => a.doi).filter(Boolean);
+    
+    const { data: existingPapers } = await supabase
+      .from('selected_papers')
+      .select('pubmed_id, doi')
+      .or(`pubmed_id.in.(${existingPapersPmids.join(',')}),doi.in.(${existingPapersDois.join(',')})`);
+    
+    const existingPmidSet = new Set(existingPapers?.map(p => p.pubmed_id) || []);
+    const existingDoiSet = new Set(existingPapers?.map(p => p.doi) || []);
+    
+    // Filter out papers that already exist
+    const newArticles = aiSelectedArticles.filter(a => 
+      !existingPmidSet.has(a.pmid) && !existingDoiSet.has(a.doi)
+    );
+    
+    if (newArticles.length === 0) {
+      console.log('All selected papers already exist in database');
+      return new Response(
+        JSON.stringify({ success: true, papersSelected: 0, message: 'All papers already exist' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Calculate current week number and year for storage
     const now = new Date();
     const currentYear = now.getFullYear();
@@ -228,7 +253,7 @@ Abstract: ${a.abstract}
     const daysSinceStart = Math.floor((now.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24));
     const currentWeekNumber = Math.ceil((daysSinceStart + startOfYear.getDay() + 1) / 7);
 
-    const selectedPapers = aiSelectedArticles.map(article => ({
+    const selectedPapers = newArticles.map(article => ({
       subject_id: subjectId,
       week_number: currentWeekNumber,
       year: currentYear,

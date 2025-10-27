@@ -72,19 +72,13 @@ const Admin = () => {
         .from("blog_posts")
         .select("paper_ids");
       
-      console.log("Ready papers before filtering:", ready);
-      console.log("All blog posts:", allBlogPosts);
-      
       // Collect all paper IDs that are referenced in blog posts
       const usedPaperIds = new Set<string>();
       allBlogPosts?.forEach(post => {
         post.paper_ids.forEach((paperId: string) => usedPaperIds.add(paperId));
       });
       
-      console.log("Used paper IDs:", Array.from(usedPaperIds));
-      
       const filteredReady = ready.filter(paper => !usedPaperIds.has(paper.id));
-      console.log("Filtered ready papers:", filteredReady);
       setReadyPapers(filteredReady);
     }
     
@@ -178,7 +172,6 @@ const Admin = () => {
         description: "Paper is ready for processing",
       });
 
-      console.log("PDF uploaded, refreshing papers list...");
       await fetchPendingPapers();
     } catch (error) {
       console.error("Upload error:", error);

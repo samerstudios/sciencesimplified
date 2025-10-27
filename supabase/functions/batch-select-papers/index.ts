@@ -239,6 +239,18 @@ Publication Date: ${a.pubDate || 'N/A'}
 
           console.log(`Selected article: ${selectedArticle.title}`);
 
+          // Check if this paper already exists in the database
+          const { data: existingPaper } = await supabase
+            .from('selected_papers')
+            .select('id')
+            .or(`pubmed_id.eq.${selectedArticle.pubmedId},doi.eq.${selectedArticle.doi}`)
+            .maybeSingle();
+          
+          if (existingPaper) {
+            console.log(`Paper already exists in database, skipping: ${selectedArticle.title}`);
+            continue;
+          }
+
           // Store the selected paper with the Sunday date
           const { error: insertError } = await supabase
             .from('selected_papers')
