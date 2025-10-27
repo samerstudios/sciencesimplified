@@ -477,15 +477,13 @@ const Admin = () => {
   const handlePublishAll = async () => {
     if (draftPosts.length === 0) return;
 
-    const publishDate = new Date().toISOString();
     const postIds = draftPosts.map(p => p.id);
 
     try {
       const { error } = await supabase
         .from("blog_posts")
         .update({ 
-          status: "published",
-          publish_date: publishDate
+          status: "published"
         })
         .in("id", postIds);
 
