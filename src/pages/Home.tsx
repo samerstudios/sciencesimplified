@@ -51,12 +51,7 @@ const Home = () => {
 
         const { data: posts } = await supabase
           .from("blog_posts")
-          .select(`
-            *,
-            subjects:subject_id (
-              name
-            )
-          `)
+          .select("*")
           .eq("status", "published")
           .order("publish_date", { ascending: false });
 
