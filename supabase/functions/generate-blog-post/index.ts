@@ -282,6 +282,44 @@ serve(async (req) => {
         console.log(`Paper IDs: ${allPaperIds.join(', ')}`);
         console.log(`Subject IDs: ${allSubjectIds.join(', ')}`);
         
+        // Check if a blog post with matching paper title already exists
+        const { data: existingPosts, error: checkError } = await supabase
+          .from('blog_posts')
+          .select('id, paper_ids, subject_ids, title')
+          .ilike('title', `%${primaryPaper.article_title.substring(0, 30)}%`);
+        
+        if (checkError) {
+          console.error('Error checking for existing posts:', checkError);
+        }
+        
+        // If a post exists with a very similar title, merge into it instead of creating new
+        const exactMatch = existingPosts?.find(post => 
+          post.title && primaryPaper.article_title && 
+          post.title.toLowerCase().includes(primaryPaper.article_title.toLowerCase().substring(0, 20))
+        );
+        
+        if (exactMatch) {
+          console.log(`Found existing post "${exactMatch.title}" - merging papers and subjects`);
+          
+          // Merge paper_ids and subject_ids
+          const mergedPaperIds = [...new Set([...exactMatch.paper_ids, ...allPaperIds])];
+          const mergedSubjectIds = [...new Set([...exactMatch.subject_ids, ...allSubjectIds])];
+          
+          const { error: updateError } = await supabase
+            .from('blog_posts')
+            .update({
+              paper_ids: mergedPaperIds,
+              subject_ids: mergedSubjectIds
+            })
+            .eq('id', exactMatch.id);
+          
+          if (updateError) throw updateError;
+          
+          console.log(`Updated existing post ${exactMatch.id} with ${allPaperIds.length} new paper(s) and ${allSubjectIds.length} subject(s)`);
+          createdPosts.push({ ...exactMatch, paper_ids: mergedPaperIds, subject_ids: mergedSubjectIds, updated: true });
+          continue;
+        }
+        
         const generatedContent = await generateContent(primaryPaper);
         
         const readTime = generatedContent.reading_time_minutes || Math.ceil(generatedContent.content.split(' ').length / 200);
