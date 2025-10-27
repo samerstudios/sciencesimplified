@@ -14,3 +14,6 @@ verify_jwt = false
 
 [functions.send-newsletter]
 verify_jwt = false
+
+[functions.upload-paper-pdf]
+verify_jwt = false

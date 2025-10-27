@@ -157,15 +157,12 @@ const Admin = () => {
 
       if (uploadError) throw uploadError;
 
-      const { error: updateError } = await supabase
-        .from("selected_papers")
-        .update({
-          pdf_storage_path: filePath,
-          status: "pdf_uploaded"
-        })
-        .eq("id", paperId);
+      // Update database via edge function with service role access
+      const { error: functionError } = await supabase.functions.invoke('upload-paper-pdf', {
+        body: { paperId, filePath }
+      });
 
-      if (updateError) throw updateError;
+      if (functionError) throw functionError;
 
       toast({
         title: "PDF uploaded successfully!",
