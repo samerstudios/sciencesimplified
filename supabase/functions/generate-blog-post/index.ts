@@ -213,17 +213,20 @@ serve(async (req) => {
     if (papersError) throw papersError;
     if (!papers || papers.length === 0) throw new Error('Papers not found');
 
-    // Check which papers already have blog posts
-    const { data: existingCitations, error: citationsError } = await supabase
-      .from('paper_citations')
-      .select('selected_paper_id')
-      .in('selected_paper_id', limitedPaperIds);
+    // Check which papers already have blog posts by checking blog_posts.paper_ids arrays
+    const { data: allBlogPosts, error: blogPostsError } = await supabase
+      .from('blog_posts')
+      .select('paper_ids');
 
-    if (citationsError) {
-      console.error('Error checking existing citations:', citationsError);
+    if (blogPostsError) {
+      console.error('Error checking existing blog posts:', blogPostsError);
     }
 
-    const existingPaperIds = new Set(existingCitations?.map(c => c.selected_paper_id) || []);
+    // Collect all paper IDs that are referenced in any blog post
+    const existingPaperIds = new Set<string>();
+    allBlogPosts?.forEach(post => {
+      post.paper_ids?.forEach((paperId: string) => existingPaperIds.add(paperId));
+    });
     
     // Filter out papers that already have blog posts
     const papersToGenerate = papers.filter(paper => !existingPaperIds.has(paper.id));

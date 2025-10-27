@@ -86,23 +86,48 @@ const Admin = () => {
   };
 
   const fetchDraftPosts = async () => {
-    const { data } = await supabase
-      .from("blog_posts")
-      .select("*")
-      .eq("status", "draft")
-      .order("created_at", { ascending: false });
-    
-    if (data) setDraftPosts(data);
+    try {
+      const { data, error } = await supabase
+        .from("blog_posts")
+        .select("*")
+        .eq("status", "draft")
+        .order("created_at", { ascending: false });
+      
+      if (error) {
+        console.error("Error fetching draft posts:", error);
+        throw error;
+      }
+      
+      console.log("Fetched draft posts:", data?.length || 0);
+      setDraftPosts(data || []);
+    } catch (error) {
+      console.error("Error in fetchDraftPosts:", error);
+      toast({
+        title: "Error loading drafts",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive",
+      });
+    }
   };
 
   const fetchPublishedPosts = async () => {
-    const { data } = await supabase
+    try {
+      const { data, error } = await supabase
       .from("blog_posts")
-      .select("*")
-      .eq("status", "published")
-      .order("publish_date", { ascending: false });
-    
-    if (data) setPublishedPosts(data);
+        .select("*")
+        .eq("status", "published")
+        .order("publish_date", { ascending: false });
+      
+      if (error) {
+        console.error("Error fetching published posts:", error);
+        throw error;
+      }
+      
+      console.log("Fetched published posts:", data?.length || 0);
+      setPublishedPosts(data || []);
+    } catch (error) {
+      console.error("Error in fetchPublishedPosts:", error);
+    }
   };
 
   const handleClearAllPosts = async () => {
@@ -408,10 +433,15 @@ const Admin = () => {
           description: responseData.message || "Check the Draft Posts section below to review and publish",
         });
 
+        // Add a small delay to ensure database transaction is complete
+        await new Promise(resolve => setTimeout(resolve, 1000));
+
         // Refresh data
-        await fetchPendingPapers();
-        await fetchDraftPosts();
-        await fetchPublishedPosts();
+        await Promise.all([
+          fetchPendingPapers(),
+          fetchDraftPosts(),
+          fetchPublishedPosts()
+        ]);
 
         // If there are remaining papers, inform the user
         if (responseData.remainingPapers > 0) {
