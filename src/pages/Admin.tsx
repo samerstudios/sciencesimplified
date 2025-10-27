@@ -46,13 +46,23 @@ const Admin = () => {
   const fetchPendingPapers = async () => {
     const { data: pending } = await supabase
       .from("selected_papers")
-      .select("*")
+      .select(`
+        *,
+        subjects (
+          name
+        )
+      `)
       .eq("status", "pending_pdf")
       .order("selection_date", { ascending: false });
     
     const { data: ready } = await supabase
       .from("selected_papers")
-      .select("*")
+      .select(`
+        *,
+        subjects (
+          name
+        )
+      `)
       .eq("status", "pdf_uploaded")
       .order("selection_date", { ascending: false });
     
@@ -593,6 +603,11 @@ const Admin = () => {
                       dangerouslySetInnerHTML={{ __html: paper.article_title }}
                     />
                     <p className="text-xs text-muted-foreground">{paper.journal_name}</p>
+                    {paper.subjects && (
+                      <p className="text-xs text-primary font-medium mt-1">
+                        Subject: {paper.subjects.name}
+                      </p>
+                    )}
                   </div>
                   <div className="flex items-center gap-2">
                     <Label htmlFor={`file-${paper.id}`} className="cursor-pointer flex-1">
@@ -655,6 +670,11 @@ const Admin = () => {
                       dangerouslySetInnerHTML={{ __html: paper.article_title }}
                     />
                     <p className="text-xs text-muted-foreground">{paper.journal_name}</p>
+                    {paper.subjects && (
+                      <p className="text-xs text-primary font-medium mt-1">
+                        Subject: {paper.subjects.name}
+                      </p>
+                    )}
                     <div className="flex items-center gap-2 mt-2">
                       <CheckCircle className="h-4 w-4 text-green-500" />
                       <p className="text-xs text-green-600">PDF uploaded</p>
