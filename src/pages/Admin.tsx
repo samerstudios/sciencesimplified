@@ -72,13 +72,20 @@ const Admin = () => {
         .from("blog_posts")
         .select("paper_ids");
       
+      console.log("Total papers with PDFs:", ready.length);
+      console.log("Total blog posts:", allBlogPosts?.length || 0);
+      
       // Collect all paper IDs that are referenced in blog posts
       const usedPaperIds = new Set<string>();
       allBlogPosts?.forEach(post => {
-        post.paper_ids.forEach((paperId: string) => usedPaperIds.add(paperId));
+        post.paper_ids?.forEach((paperId: string) => usedPaperIds.add(paperId));
       });
       
+      console.log("Papers already used in blog posts:", usedPaperIds.size);
+      
       const filteredReady = ready.filter(paper => !usedPaperIds.has(paper.id));
+      console.log("Papers without blog posts:", filteredReady.length);
+      
       setReadyPapers(filteredReady);
     }
     

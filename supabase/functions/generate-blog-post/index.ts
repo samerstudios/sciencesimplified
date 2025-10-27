@@ -197,23 +197,7 @@ serve(async (req) => {
       throw new Error('No paper IDs provided');
     }
 
-    // CRITICAL: Limit batch size to prevent timeout (edge functions have ~2 min limit)
-    // Reduced to 5 to stay well under browser fetch timeout limits (~60-90 seconds)
-    const MAX_BATCH_SIZE = 5;
-    const tooManyPapers = paperIds.length > MAX_BATCH_SIZE;
-    const limitedPaperIds = tooManyPapers ? paperIds.slice(0, MAX_BATCH_SIZE) : paperIds;
-
-    console.log(`Generating blog posts for ${limitedPaperIds.length} papers${tooManyPapers ? ` (limited from ${paperIds.length})` : ''}`);
-
-    const { data: papers, error: papersError } = await supabase
-      .from('selected_papers')
-      .select('*')
-      .in('id', limitedPaperIds);
-
-    if (papersError) throw papersError;
-    if (!papers || papers.length === 0) throw new Error('Papers not found');
-
-    // Check which papers already have blog posts by checking blog_posts.paper_ids arrays
+    // Check which papers already have blog posts FIRST (before limiting batch size)
     const { data: allBlogPosts, error: blogPostsError } = await supabase
       .from('blog_posts')
       .select('paper_ids');
@@ -228,23 +212,41 @@ serve(async (req) => {
       post.paper_ids?.forEach((paperId: string) => existingPaperIds.add(paperId));
     });
     
-    // Filter out papers that already have blog posts
-    const papersToGenerate = papers.filter(paper => !existingPaperIds.has(paper.id));
+    // Filter to only papers that DON'T have blog posts yet
+    const papersWithoutPosts = paperIds.filter((id: string) => !existingPaperIds.has(id));
     
-    if (papersToGenerate.length === 0) {
+    console.log(`${papersWithoutPosts.length} of ${paperIds.length} papers need blog posts`);
+    
+    if (papersWithoutPosts.length === 0) {
       return new Response(
         JSON.stringify({ 
           success: true, 
-          message: 'All selected papers already have blog posts', 
+          message: 'All papers already have blog posts', 
           blogPosts: [], 
           count: 0,
-          remainingPapers: tooManyPapers ? paperIds.length - MAX_BATCH_SIZE : 0
+          remainingPapers: 0
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log(`Generating blog posts for ${papersToGenerate.length} new papers (skipping ${existingPaperIds.size} existing)`);
+    // CRITICAL: Limit batch size to prevent timeout (edge functions have ~2 min limit)
+    const MAX_BATCH_SIZE = 5;
+    const tooManyPapers = papersWithoutPosts.length > MAX_BATCH_SIZE;
+    const limitedPaperIds = tooManyPapers ? papersWithoutPosts.slice(0, MAX_BATCH_SIZE) : papersWithoutPosts;
+
+    console.log(`Processing ${limitedPaperIds.length} papers${tooManyPapers ? ` (${papersWithoutPosts.length - MAX_BATCH_SIZE} remaining for next batch)` : ''}`);
+
+    const { data: papers, error: papersError } = await supabase
+      .from('selected_papers')
+      .select('*')
+      .in('id', limitedPaperIds);
+
+    if (papersError) throw papersError;
+    if (!papers || papers.length === 0) throw new Error('Papers not found');
+    
+    const papersToGenerate = papers;
+    
 
     // Group papers by article title to avoid duplicates across subjects
     const paperGroups = new Map<string, typeof papersToGenerate>();
@@ -330,8 +332,8 @@ serve(async (req) => {
       }
     }
 
-    const remainingInQueue = tooManyPapers ? paperIds.length - MAX_BATCH_SIZE : 0;
-    const message = createdPosts.length > 0 
+    const remainingInQueue = papersWithoutPosts.length - limitedPaperIds.length;
+    const message = createdPosts.length > 0
       ? `Successfully generated ${createdPosts.length} blog post${createdPosts.length > 1 ? 's' : ''}${errors.length > 0 ? ` (${errors.length} failed)` : ''}${remainingInQueue > 0 ? `. ${remainingInQueue} papers remaining - run again to continue.` : ''}`
       : `Failed to generate any blog posts. ${errors.length} error(s) occurred.`;
 
