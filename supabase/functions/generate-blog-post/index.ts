@@ -243,54 +243,60 @@ serve(async (req) => {
 
     console.log(`Generating blog posts for ${papersToGenerate.length} new papers (skipping ${existingPaperIds.size} existing)`);
 
+    // Group papers by article title to avoid duplicates across subjects
+    const paperGroups = new Map<string, typeof papersToGenerate>();
+    for (const paper of papersToGenerate) {
+      const normalizedTitle = paper.article_title.toLowerCase().trim();
+      if (!paperGroups.has(normalizedTitle)) {
+        paperGroups.set(normalizedTitle, []);
+      }
+      paperGroups.get(normalizedTitle)!.push(paper);
+    }
+
+    console.log(`Grouped ${papersToGenerate.length} papers into ${paperGroups.size} unique titles`);
+
     const createdPosts = [];
     const errors = [];
     const startTime = Date.now();
     const TIMEOUT_MS = 100000; // 100 seconds timeout (leaving buffer before 120s edge function limit)
 
-    // Generate a separate blog post for each paper
-    for (const paper of papersToGenerate) {
+    // Generate one blog post per unique title (combining papers from multiple subjects)
+    for (const [title, groupedPapers] of paperGroups.entries()) {
       // Check if we're approaching timeout
       if (Date.now() - startTime > TIMEOUT_MS) {
         console.log(`Timeout approaching after ${createdPosts.length} posts. Returning partial results.`);
         break;
       }
       try {
-        console.log(`Generating blog post for paper: ${paper.id}`);
+        // Use the first paper in the group as the source for content generation
+        const primaryPaper = groupedPapers[0];
+        const allPaperIds = groupedPapers.map(p => p.id);
+        const allSubjectIds = [...new Set(groupedPapers.map(p => p.subject_id))];
         
-        const generatedContent = await generateContent(paper);
+        console.log(`Generating blog post for ${groupedPapers.length} paper(s) with title: "${primaryPaper.article_title}"`);
+        console.log(`Paper IDs: ${allPaperIds.join(', ')}`);
+        console.log(`Subject IDs: ${allSubjectIds.join(', ')}`);
+        
+        const generatedContent = await generateContent(primaryPaper);
         
         const readTime = generatedContent.reading_time_minutes || Math.ceil(generatedContent.content.split(' ').length / 200);
 
-        // Map subject_id to hero image
-        const subjectImageMap: Record<string, string> = {
-          '3a2750e5-4de3-443e-933a-4ff3858cd822': '/neuroplasticity.jpg', // Neuroscience
-          'ba7c52fb-0124-42dc-af06-335ec1239810': '/immunology.jpg',      // Immunology
-          'b99b45c3-782e-4d1f-b072-745c5687e59e': '/cancer.jpg',          // Cancer
-          '596e6779-37d7-4843-b9ac-9f14877f5a11': '/genetics.jpg',        // Genetics
-          'd7f66f2f-88e1-4558-879e-f141ff3b54f8': '/climate.jpg',         // Climate
-          'e418764e-bc42-45d5-864a-634c71801f94': '/microbiome.jpg',      // Microbiology
-          'a2588b0c-a80e-42aa-9ffe-f06c508f3adf': '/quantum.jpg',         // Physics
-          '33f41edc-13c4-4346-a10f-2aa7d541ba3a': '/fusion.jpg'           // Energy
-        };
+        // Use the first paper's selection_date as the publish_date
+        const publishDate = primaryPaper.selection_date || new Date().toISOString();
 
-        const heroImage = subjectImageMap[paper.subject_id] || '/quantum.jpg';
-
-        // Use the paper's selection_date as the publish_date (even for drafts)
-        // This ensures historical posts have the correct date from the start
-        const publishDate = paper.selection_date || new Date().toISOString();
-
+        // Store NULL for hero_image_url - it will be determined dynamically when displaying
         const { data: blogPost, error: blogError } = await supabase
           .from('blog_posts')
           .insert({
-            subject_id: paper.subject_id,
+            subject_id: primaryPaper.subject_id, // Keep for backwards compatibility
+            subject_ids: allSubjectIds, // New: array of all subject IDs
             title: generatedContent.title,
             subtitle: generatedContent.subtitle,
             excerpt: generatedContent.excerpt,
             content: generatedContent.content,
             read_time: readTime,
-            paper_ids: [paper.id],
-            hero_image_url: heroImage,
+            paper_ids: allPaperIds,
+            hero_image_url: null, // Will be determined dynamically based on subject context
             status: 'draft',
             publish_date: publishDate
           })
@@ -298,23 +304,26 @@ serve(async (req) => {
           .single();
 
         if (blogError) {
-          console.error(`Failed to insert blog post for paper ${paper.id}:`, blogError);
+          console.error(`Failed to insert blog post for papers ${allPaperIds.join(', ')}:`, blogError);
           continue;
         }
 
-        await supabase.from('paper_citations').insert({
-          blog_post_id: blogPost.id,
-          selected_paper_id: paper.id,
-          citation_order: 1
-        });
+        // Create paper citations for all papers in the group
+        for (let i = 0; i < allPaperIds.length; i++) {
+          await supabase.from('paper_citations').insert({
+            blog_post_id: blogPost.id,
+            selected_paper_id: allPaperIds[i],
+            citation_order: i + 1
+          });
+        }
 
         createdPosts.push(blogPost);
-        console.log(`Successfully generated blog post: ${blogPost.id} (${createdPosts.length}/${papersToGenerate.length})`);
+        console.log(`Successfully generated blog post: ${blogPost.id} for ${groupedPapers.length} paper(s) (${createdPosts.length}/${paperGroups.size})`);
       } catch (error) {
         const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-        console.error(`Failed to generate blog post for paper ${paper.id}:`, errorMsg);
-        errors.push({ paperId: paper.id, error: errorMsg });
-        // Continue with next paper instead of failing completely
+        console.error(`Failed to generate blog post for paper group "${title}":`, errorMsg);
+        errors.push({ title: title, error: errorMsg });
+        // Continue with next paper group instead of failing completely
       }
     }
 

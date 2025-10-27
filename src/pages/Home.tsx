@@ -60,20 +60,47 @@ const Home = () => {
           .eq("status", "published")
           .order("publish_date", { ascending: false });
 
-        if (posts) {
-          const formattedArticles = posts.map(post => ({
-            id: post.id,
-            title: post.title,
-            excerpt: post.excerpt,
-            image: post.hero_image_url || "/quantum.jpg",
-            date: new Date(post.publish_date || post.created_at).toLocaleDateString("en-US", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            }),
-            readTime: post.read_time,
-            category: (post.subjects as any)?.name || "Physics",
-          }));
+        if (posts && subjects) {
+          // Create a map of subject IDs to names and images
+          const subjectMap = new Map(subjects.map(s => [s.id, s.name]));
+          const subjectImageMap: Record<string, string> = {
+            '3a2750e5-4de3-443e-933a-4ff3858cd822': '/neuroplasticity.jpg', // Neuroscience
+            'ba7c52fb-0124-42dc-af06-335ec1239810': '/immunology.jpg',      // Immunology
+            'b99b45c3-782e-4d1f-b072-745c5687e59e': '/cancer.jpg',          // Cancer
+            '596e6779-37d7-4843-b9ac-9f14877f5a11': '/genetics.jpg',        // Genetics
+            'd7f66f2f-88e1-4558-879e-f141ff3b54f8': '/climate.jpg',         // Climate
+            'e418764e-bc42-45d5-864a-634c71801f94': '/microbiome.jpg',      // Microbiology
+            'a2588b0c-a80e-42aa-9ffe-f06c508f3adf': '/quantum.jpg',         // Physics
+            '33f41edc-13c4-4346-a10f-2aa7d541ba3a': '/fusion.jpg'           // Energy
+          };
+
+          // For posts with multiple subjects, create a card for each subject
+          const formattedArticles: any[] = [];
+          for (const post of posts) {
+            const postSubjectIds = post.subject_ids || (post.subject_id ? [post.subject_id] : []);
+            
+            // Create an article card for each subject this post belongs to
+            for (const subjectId of postSubjectIds) {
+              const subjectName = subjectMap.get(subjectId);
+              if (subjectName) {
+                formattedArticles.push({
+                  id: `${post.id}-${subjectId}`, // Unique ID for each subject view
+                  postId: post.id, // Original post ID for linking
+                  title: post.title,
+                  excerpt: post.excerpt,
+                  image: subjectImageMap[subjectId] || post.hero_image_url || "/quantum.jpg",
+                  date: new Date(post.publish_date || post.created_at).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  }),
+                  readTime: post.read_time,
+                  category: subjectName,
+                  subjectId: subjectId,
+                });
+              }
+            }
+          }
           setArticles(formattedArticles);
         }
       } catch (error) {
@@ -158,7 +185,7 @@ const Home = () => {
               <div ref={articlesRef} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {paginatedArticles.map((article) => (
                   <div key={article.id} className="article-card opacity-0">
-                    <ArticleCard article={article} />
+                    <ArticleCard article={{ ...article, id: article.postId }} />
                   </div>
                 ))}
               </div>
