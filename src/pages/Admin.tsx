@@ -151,7 +151,9 @@ const Admin = () => {
 
       const { error: uploadError } = await supabase.storage
         .from("research-pdfs")
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          upsert: true
+        });
 
       if (uploadError) throw uploadError;
 
