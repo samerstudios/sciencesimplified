@@ -83,7 +83,7 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { subjectId, weekNumber, year } = await req.json();
+    const { subjectId, weekNumber, year, excludedPubmedIds = [] } = await req.json();
     
     const { data: subject } = await supabase
       .from('subjects')
@@ -214,11 +214,13 @@ Abstract: ${a.abstract}
     const selectedPmids = JSON.parse(jsonMatch[0]) as string[];
     console.log(`AI selected Paper of the Week:`, selectedPmids[0]);
     
-    // Filter articles to only include AI-selected ones
-    const aiSelectedArticles = sortedArticles.filter(a => selectedPmids.includes(a.pmid));
+    // Filter articles to only include AI-selected ones and exclude any blacklisted PMIDs
+    const aiSelectedArticles = sortedArticles.filter(a => 
+      selectedPmids.includes(a.pmid) && !excludedPubmedIds.includes(a.pmid)
+    );
     
     if (aiSelectedArticles.length === 0) {
-      throw new Error('No papers matched AI selection');
+      throw new Error('No papers matched AI selection or all were excluded');
     }
 
     // Check if any of these papers already exist in the database

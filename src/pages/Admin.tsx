@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Upload, CheckCircle, Eye, Trash2 } from "lucide-react";
+import { Loader2, Upload, CheckCircle, Eye, Trash2, RefreshCw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -241,6 +241,57 @@ const Admin = () => {
         title: "Delete failed",
         description: error instanceof Error ? error.message : "Unknown error",
         variant: "destructive",
+      });
+    }
+  };
+
+  const handleRegeneratePaper = async (paperId: string) => {
+    const paper = pendingPapers.find(p => p.id === paperId);
+    if (!paper) return;
+
+    setUploadingPapers(prev => new Set(prev).add(paperId));
+    try {
+      // Call select-papers with the current paper's PMID excluded
+      const { data, error } = await supabase.functions.invoke("select-papers", {
+        body: { 
+          subjectId: paper.subject_id,
+          weekNumber: paper.week_number,
+          year: paper.year,
+          excludedPubmedIds: [paper.pubmed_id]
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.papersSelected > 0) {
+        // Delete the old paper after successful selection
+        await handleDeletePendingPaper(paperId);
+        
+        toast({
+          title: "New paper selected!",
+          description: "A different paper has been chosen for this subject",
+        });
+
+        await fetchPendingPapers();
+      } else {
+        toast({
+          title: "No alternative found",
+          description: data?.message || "Could not find a different paper",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error("Regenerate error:", error);
+      toast({
+        title: "Regeneration failed",
+        description: error instanceof Error ? error.message : "Unknown error",
+        variant: "destructive",
+      });
+    } finally {
+      setUploadingPapers(prev => {
+        const next = new Set(prev);
+        next.delete(paperId);
+        return next;
       });
     }
   };
@@ -673,6 +724,15 @@ const Admin = () => {
                         </span>
                       </Button>
                     </Label>
+                    <Button
+                      onClick={() => handleRegeneratePaper(paper.id)}
+                      variant="outline"
+                      size="sm"
+                      disabled={uploadingPapers.has(paper.id)}
+                      title="Generate a different paper for this subject"
+                    >
+                      <RefreshCw className={`h-4 w-4 ${uploadingPapers.has(paper.id) ? 'animate-spin' : ''}`} />
+                    </Button>
                     <Button
                       onClick={() => handleDeletePendingPaper(paper.id)}
                       variant="destructive"
