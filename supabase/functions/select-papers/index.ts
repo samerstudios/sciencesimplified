@@ -140,15 +140,24 @@ serve(async (req) => {
     
     const articles = await searchPubMed(searchQuery, startDateStr, endDateStr);
     
-    // Sort articles by impact factor (highest first)
+    // Sort articles by impact factor (highest first) and filter out excluded papers BEFORE AI selection
     const sortedArticles = articles
+      .filter(article => !excludedPubmedIds.includes(article.pmid))
       .map(article => ({
         ...article,
         impactFactor: journalImpactMap.get(article.journal) || 0
       }))
       .sort((a, b) => b.impactFactor - a.impactFactor);
     
-    console.log(`Found ${sortedArticles.length} papers, sorted by impact factor, sending to AI for thematic selection...`);
+    if (sortedArticles.length === 0) {
+      console.log('No papers available after filtering excluded papers');
+      return new Response(
+        JSON.stringify({ success: true, papersSelected: 0, message: 'No alternative papers available' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    
+    console.log(`Found ${sortedArticles.length} papers after exclusions, sorted by impact factor, sending to AI for thematic selection...`);
     
     // Use AI to select 1-5 most compelling papers
     const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
@@ -214,13 +223,11 @@ Abstract: ${a.abstract}
     const selectedPmids = JSON.parse(jsonMatch[0]) as string[];
     console.log(`AI selected Paper of the Week:`, selectedPmids[0]);
     
-    // Filter articles to only include AI-selected ones and exclude any blacklisted PMIDs
-    const aiSelectedArticles = sortedArticles.filter(a => 
-      selectedPmids.includes(a.pmid) && !excludedPubmedIds.includes(a.pmid)
-    );
+    // Filter articles to only include AI-selected ones (exclusions already handled before AI)
+    const aiSelectedArticles = sortedArticles.filter(a => selectedPmids.includes(a.pmid));
     
     if (aiSelectedArticles.length === 0) {
-      throw new Error('No papers matched AI selection or all were excluded');
+      throw new Error('No papers matched AI selection');
     }
 
     // Check if any of these papers already exist in the database
