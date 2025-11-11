@@ -427,7 +427,9 @@ const Admin = () => {
           }
 
           totalPapersSelected += data.papersSelected || 0;
-          setSelectedPapers(prev => [...prev, ...data.papers.map((p: any) => p.id)]);
+          if (data.papers && data.papers.length > 0) {
+            setSelectedPapers(prev => [...prev, ...data.papers.map((p: any) => p.id)]);
+          }
         } catch (error) {
           allErrors.push(`${subjectName}: ${error instanceof Error ? error.message : "Unknown error"}`);
         }

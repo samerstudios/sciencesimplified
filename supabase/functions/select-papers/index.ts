@@ -152,7 +152,7 @@ serve(async (req) => {
     if (sortedArticles.length === 0) {
       console.log('No papers available after filtering excluded papers');
       return new Response(
-        JSON.stringify({ success: true, papersSelected: 0, message: 'No alternative papers available' }),
+        JSON.stringify({ success: true, papersSelected: 0, papers: [], message: 'No alternative papers available' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
